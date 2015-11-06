@@ -1,0 +1,255 @@
+#chess {
+	width: 620px;
+	float: left;
+}
+
+.board {
+	width: 460px; height: 460px;
+	float: left;
+}
+.board__border-rows {
+	width: 25px; height: 400px;
+	font-size: 10px;
+	margin: 30px 0 30px 0;
+}
+.board__border-rows_left {
+	float: left;
+}
+.board__border-rows_right {
+	float: right;
+}
+.board__border-row {
+	width: 25px; height: 50px;
+	line-height: 50px;
+	text-align: center;
+}
+.board__border-cols {
+	width: 400px; height: 25px;
+	font-size: 10px;
+	margin-left: 5px;
+	float: left;
+}
+.board__border-cols_top {
+	
+}
+.board__border-cols_bottom {
+	
+}
+.board__border-col {
+	width: 50px; height: 25px;
+	line-height: 25px;
+	text-align: center;
+	float: left;
+}
+.board__board {
+	border: 5px solid #ccc;
+	float: right;
+}
+.board__row {
+	height: 50px;
+}
+.board__col {
+	width: 50px; height: 50px;
+	line-height: 50px;
+	float: left;
+}
+.board__field {
+	outline: 1px solid #bbb;
+}
+.board__field_white {
+	background-color: #efefef;
+}
+.board__field_black {
+	background-color: #cbcbcb;
+}
+.board__field_shah {
+	background-color: #ff0000;
+}
+.board__field_checkmate {
+	background-color: #ff0000;
+}
+.board__field_select {
+	background-color: #75c1ff;
+}
+.board__field_waypoint {
+	background-color: #c2f2c2;
+	cursor: pointer;
+}
+.board__field_waypoint:hover {
+	box-shadow: 0 0 3px #888 inset;
+}
+.board__field_waypoint_enemy {
+	background-color: #ffcccc;
+}
+.board__field_waypoint_passant {
+	background-color: #e8ccff;
+}
+.board__field_waypoint_castling {
+	background-color: #e8ccff;
+}
+.board__history-move {
+	width: inherit; height: inherit;
+	text-align: center;
+	font-size: 32px;
+	color: #fff;
+	position: absolute;
+	overflow: hidden;
+	z-index: 2;
+}
+.board__field-history {
+	background-color: #a333ff;
+}
+.board__field-history_previous {
+	background-color: #ffff99;
+}
+.board__field-history_current {
+	background-color: #b3ffb3;
+}
+
+.board__figure {
+	width: inherit; height: inherit;
+	position: absolute;
+}
+.board__figure_white {
+
+}
+.board__figure_black {
+	
+}
+.board__figure_select {
+	cursor: pointer;
+}
+
+.players {
+	width: 160px; height: 100px;
+	background-color: #ffdbde;
+	font-size: 14px;
+	margin-top: 30px;
+	float: right;
+}
+.players__player {
+	width: inherit; height: 50px;
+}
+.players__player_white {
+	background-color: #efefef;
+}
+.players__player_black {
+	background-color: #e5e5e5;
+}
+.players__player_online {
+	
+}
+.players__player_offline {
+	background-color: #ffdbde !important;
+}
+
+.icon__figure {
+	width: 25px; height: 25px;
+	float: left;
+}
+.icon__figure img {
+	width: inherit; height: inherit;
+	margin-left: 1px;
+}
+.icon__time {
+	width: 25px; height: 25px;
+	float: left;
+}
+.icon__time img {
+	width: inherit; height: inherit;
+	margin-left: 1px;
+}
+.player__name {
+	height: 25px;
+	line-height: 25px;
+	text-indent: 5px;
+	overflow: hidden;
+}
+.player__time {
+	height: 25px;
+	line-height: 25px;
+	text-indent: 5px;
+	overflow: hidden;
+}
+.player__time_miss {
+	color: #ff0000;
+}
+.player__time_timeout {
+	color: #ff0000;
+}
+.player__time_current {
+	font-weight: bold;
+}
+.player__walk {
+	background-color: #009900;
+    border-radius: 5px;
+	font-size: 12px;
+	color: #fff;
+    float: right;
+    margin: 5px;
+    padding: 2px 5px;
+}
+
+.history {
+	width: 160px; height: 300px;
+	float: right;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.history__row {
+	width: inherit; height: 25px;
+	background-color: #efefef;
+	line-height: 25px;
+	cursor: pointer;
+}
+.history__row:nth-child(even) {
+}
+.history__row:hover {
+	background-color: #a333ff !important;
+	color: #fff;
+}
+.history__row_our-eat {
+	background-color: #ff0000 !important;
+	color: #fff;
+}
+.history__row_enemy-eat {
+	background-color: #009900 !important;
+	color: #fff;
+}
+.history__row_move {
+	
+}
+.history__container {
+	width: 100px;
+	float: left;
+	margin-left: 5px;
+}
+.history__index {
+	width: 15px; height: inherit;
+	font-size: 10px;
+	float: left;
+	margin-left: 10px;
+}
+.history__figure {
+	width: 25px; height: inherit;
+	float: left;
+}
+.history__figure_replace {
+	float: right;
+}
+.history__description {
+	float: left;
+}
+.history__position {
+	width: 25px; height: inherit;
+	line-height: 25px;
+	text-align: center;
+	font-size: 12px;
+	float: left;
+}
+.history__position_previous {
+	float: left;
+}
+.history__position_current {
+	float: right;
+}

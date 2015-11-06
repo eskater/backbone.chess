@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+	<head>
+		<title>Backbone Chess</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		
+		<link rel="stylesheet" href="/css/normalize.css" type="text/css"/>
+		<link rel="stylesheet" href="/css/chess.css" type="text/css"/>
+		
+		<script type="text/javascript" src="/js/jquery.js"></script>
+		<script type="text/javascript" src="/js/underscore.js"></script>
+		<script type="text/javascript" src="/js/backbone.js"></script>
+		<script type="text/javascript" src="/js/wrapper.js"></script>
+		<script type="text/javascript" src="/js/chess.js"></script>
+		<script type="text/javascript" src="/js/events.js"></script>
+	</head>
+	<body>
+		<div id="chess" class="container">
+			<div class="board"></div>
+			<div class="players"></div>
+			<div class="history"></div>
+		</div>
+		
+		<!-- Underscore template -->
+		<script type="text/template" id="template-board-white">
+			<div class="board__border-rows board__border-rows_left">
+				<%for(var row = 8; row >= 1; row--){%>
+					<div class="board__border-row"><%=row%></div>
+				<%}%>
+			</div>
+			<div class="board__border-cols board__border-cols_top">
+				<%for(var col = 1; col <= 8; col++){%>
+					<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+				<%}%>
+			</div>
+			<div class="board__border-rows board__border-rows_right">
+				<%for(var row = 8; row >= 1; row--){%>
+					<div class="board__border-row"><%=row%></div>
+				<%}%>
+			</div>
+			<div class="board__board">
+				<%for(var row = 8; row >= 1; row--){%>
+					<div class="board__row" data-row="<%=row%>">
+						<%for(var col = 1; col <= 8; col++){%>
+							<div class="board__col board__field board__field_<%if((col - row % 2) % 2){%>white<%}else{%>black<%}%>" data-row="<%=row%>" data-col="<%=col%>">
+								<%if((figure = board.getByRowCol(row, col))){%>
+									<img class="board__figure board__figure_<%=figure.get('color')%>" src="/img/figures/<%=figure.get('color')%>-<%=figure.get('type')%>.png" title="<%=figure.get('type')%>"/>
+								<%}%>
+							</div>
+						<%}%>
+					</div>
+				<%}%>
+			</div>
+			<div class="board__border-cols board__border-cols_bottom">
+				<%for(var col = 1; col <= 8; col++){%>
+					<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+				<%}%>
+			</div>
+		</script>
+		<script type="text/template" id="template-board-black">
+			<div class="board__border-rows board__border-rows_left">
+				<%for(var row = 1; row <= 8; row++){%>
+					<div class="board__border-row"><%=row%></div>
+				<%}%>
+			</div>
+			<div class="board__border-cols board__border-cols_top">
+				<%for(var col = 8; col >= 1; col--){%>
+					<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+				<%}%>
+			</div>
+			<div class="board__border-rows board__border-rows_right">
+				<%for(var row = 1; row <= 8; row++){%>
+					<div class="board__border-row"><%=row%></div>
+				<%}%>
+			</div>
+			<div class="board__board">
+				<%for(var row = 1; row <= 8; row++){%>
+					<div class="board__row" data-row="<%=row%>">
+						<%for(var col = 8; col >= 1; col--){%>
+							<div class="board__col board__field board__field_<%if((col - row % 2) % 2){%>white<%}else{%>black<%}%>" data-row="<%=row%>" data-col="<%=col%>">
+								<%if((figure = board.getByRowCol(row, col))){%>
+									<img class="board__figure board__figure_<%=figure.get('color')%>" src="/img/figures/<%=figure.get('color')%>-<%=figure.get('type')%>.png" title="<%=figure.get('type')%>"/>
+								<%}%>
+							</div>
+						<%}%>
+					</div>
+				<%}%>
+			</div>
+			<div class="board__border-cols board__border-cols_bottom">
+				<%for(var col = 8; col >= 1; col--){%>
+					<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+				<%}%>
+			</div>
+		</script>
+		<script type="text/template" id="template-history">
+			<%_.each(history, function(history){
+				var type = history.get('type');
+				
+				if(player){
+					switch(history.get('type')){
+						case 'eat':
+							type = player.color() == history.get('replace').color ? 'our-eat' : 'enemy-eat';
+							
+							break;
+					}
+				}
+			%>
+				<div class="history__row history__row_<%=type%>" data-cid="<%=history.cid%>">
+					<div class="history__index"><%=history.index()%>.</div>
+					<div class="history__container">
+						<img class="history__figure" src="/img/figures/<%=history.get('color')%>-<%=history.get('figure')%>.png"/>
+						<div class="history__description">
+							<div class="history__position history__position_previous">
+								<%=history.previous()%>
+							</div>
+							<div class="history__position history__position_current">
+								<%=history.current()%>
+							</div>
+						</div>
+						<%if(history.get('replace').figure){%>
+							<img class="history__figure history__figure_replace" src="/img/figures/<%=history.get('replace').color%>-<%=history.get('replace').figure%>.png">
+						<%}%>
+					</div>
+				</div>
+			<%});%>
+		</script>
+		<script type="text/template" id="template-history-item">
+			<%
+				var type = history.get('type');
+				
+				if(player){
+					switch(history.get('type')){
+						case 'eat':
+							type = player.color() == history.get('replace').color ? 'our-eat' : 'enemy-eat';
+							
+							break;
+					}
+				}
+			%>
+			<div class="history__row history__row_<%=type%>" data-cid="<%=history.cid%>" style="display: none;">
+				<div class="history__index"><%=history.index()%>.</div>
+				<div class="history__container">
+					<img class="history__figure" src="/img/figures/<%=history.get('color')%>-<%=history.get('figure')%>.png"/>
+					<div class="history__description">
+						<div class="history__position history__position_previous">
+							<%=history.previous()%>
+						</div>
+						<div class="history__position history__position_current">
+							<%=history.current()%>
+						</div>
+					</div>
+					<%if(history.get('replace').figure){%>
+						<img class="history__figure history__figure_replace" src="/img/figures/<%=history.get('replace').color%>-<%=history.get('replace').figure%>.png">
+					<%}%>
+				</div>
+			</div>
+		</script>
+		
+		<script type="text/template" id="template-player">
+			<div class="players__player players__player_<%=player.get('color')%> players__player_<%if(player.get('online')){%>online<%}else{%>offline<%}%>">
+				<div class="player__walk"<%if(!player.get('walk')){%> style="display: none;"<%}%>>walk</div>
+				<div class="icon__figure">
+					<img src="/img/figures/<%=player.get('color')%>-king.png">
+				</div>
+				<div class="player__name"><%=player.get('name')%></div>
+				<div class="icon__time">
+					<img src="/img/time.png">
+				</div>
+				<div class="player__time<%if(player.get('walk')){%> player__time_current<%}%>"><%=player.get('time')%></div>
+			</div>
+		</script>
+		
+		<script type="text/javascript" src="/js/index.js"></script>
+	</body>
+</html>
