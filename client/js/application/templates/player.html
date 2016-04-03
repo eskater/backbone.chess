@@ -1,0 +1,11 @@
+<div class="players__player players__player_<%=player.get('color')%> players__player_<%if(player.get('online')){%>online<%}else{%>offline<%}%>">
+    <div class="player__walk"<%if(!player.get('walk')){%> style="display: none;"<%}%>>walk</div>
+    <div class="icon__figure">
+        <img src="/img/figures/<%=player.get('color')%>-king.png">
+    </div>
+    <div class="player__name"><%=player.get('name')%></div>
+    <div class="icon__time">
+        <img src="/img/time.png">
+    </div>
+    <div class="player__time<%if(player.get('walk')){%> player__time_current<%}%>"><%=player.get('time')%></div>
+</div>

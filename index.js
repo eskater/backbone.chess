@@ -1,7 +1,7 @@
 WSS = require('ws').Server;
 HTTP = require('http');
 
-DB = require('./db');
+//DB = require('./db');
 ROUTE = require('./route');
 
 CHESS = require('./chess');
@@ -10,7 +10,7 @@ EVENT = require('./events');
 GAMES = require('./games');
 PLAYERS = require('./players');
 
-var route = new ROUTE('client/'),
+var route = new ROUTE('D:/Web/nodejs/backbone.chess/client/'),
 	chess = new CHESS(new EVENT(new WSS({port: 1337})));
 
 chess.transport(
@@ -31,8 +31,12 @@ chess.transport(
 			type: 'initialize',
 			handle: 
 				function(data, id, client){
+					players.findWhere({color: route.players().color()}).set('walk', true);
+					
 					transport.send('game', 'data', game.data(), client);
 					transport.send('board', 'initialize', route.fen().fen(), client);
+					transport.send('players', 'initialize', players.models, client);
+					transport.send('history', 'initialize', route.board().history().models, client);
 					
 					var newest = false,
 						player = players.findWhere({id: id});
@@ -62,11 +66,6 @@ chess.transport(
 							game.start();
 						}
 					}
-					
-					players.findWhere({color: route.players().color()}).set('walk', true);
-					
-					transport.send('players', 'initialize', players.models, client);
-					transport.send('history', 'initialize', route.board().history().models, client);
 				}
 		});
 		
@@ -117,17 +116,17 @@ chess.transport(
 			transport.send('position', 'change', {previous: figure.previous(), current: figure.position()});
 		});
 		
-		var party = new DB.Party({board: route.fen()});
+		//var party = new DB.Party({board: route.fen()});
 		
 		route.listenTo(route.board().history(), 'pushed', function(history){
-			var history = history.toJSON();
+			//var history = history.toJSON();
 			
-			history.party = party;
+			//history.party = party;
 			
-			new DB.History(history).save();
+			//new DB.History(history).save();
 		});
 		
-		party.save();
+		//party.save();
 	}
 );
 

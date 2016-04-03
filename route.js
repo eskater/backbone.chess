@@ -39,6 +39,8 @@ function Route(root){
 								header = mime.lookup(this.path(this.routes[i].file));
 							
 								content = fs.readFileSync(this.path(this.routes[i].file));
+								
+								console.log(content);
 							}catch(error){
 								status = 404;
 							}

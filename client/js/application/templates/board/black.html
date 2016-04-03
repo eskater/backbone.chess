@@ -1,0 +1,33 @@
+<div class="board__border-rows board__border-rows_left">
+	<%for(var row = 1; row <= 8; row++){%>
+		<div class="board__border-row"><%=row%></div>
+	<%}%>
+</div>
+<div class="board__border-cols board__border-cols_top">
+	<%for(var col = 8; col >= 1; col--){%>
+		<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+	<%}%>
+</div>
+<div class="board__border-rows board__border-rows_right">
+	<%for(var row = 1; row <= 8; row++){%>
+		<div class="board__border-row"><%=row%></div>
+	<%}%>
+</div>
+<div class="board__board">
+	<%for(var row = 1; row <= 8; row++){%>
+		<div class="board__row" data-row="<%=row%>">
+			<%for(var col = 8; col >= 1; col--){%>
+				<div class="board__col board__field board__field_<%if((col - row % 2) % 2){%>white<%}else{%>black<%}%>" data-row="<%=row%>" data-col="<%=col%>">
+					<%if((figure = board.getByRowCol(row, col))){%>
+						<img class="board__figure board__figure_<%=figure.get('color')%>" src="/img/figures/<%=figure.get('color')%>-<%=figure.get('type')%>.png" title="<%=figure.get('type')%>"/>
+					<%}%>
+				</div>
+			<%}%>
+		</div>
+	<%}%>
+</div>
+<div class="board__border-cols board__border-cols_bottom">
+	<%for(var col = 8; col >= 1; col--){%>
+		<div class="board__border-col"><%=String.fromCharCode(col + 64)%></div>
+	<%}%>
+</div>

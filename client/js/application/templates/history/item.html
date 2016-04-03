@@ -1,0 +1,29 @@
+<%
+	var type = history.get('type');
+
+	if(player){
+		switch(history.get('type')){
+			case 'eat':
+				type = player.color() == history.get('replace').color ? 'our-eat' : 'enemy-eat';
+
+				break;
+		}
+	}
+%>
+<div class="history__row history__row_<%=type%>" data-cid="<%=history.cid%>" style="display: none;">
+	<div class="history__index"><%=history.index()%>.</div>
+	<div class="history__container">
+		<img class="history__figure" src="/img/figures/<%=history.get('color')%>-<%=history.get('figure')%>.png"/>
+		<div class="history__description">
+			<div class="history__position history__position_previous">
+				<%=history.previous()%>
+			</div>
+			<div class="history__position history__position_current">
+				<%=history.current()%>
+			</div>
+		</div>
+		<%if(history.get('replace').figure){%>
+			<img class="history__figure history__figure_replace" src="/img/figures/<%=history.get('replace').color%>-<%=history.get('replace').figure%>.png">
+		<%}%>
+	</div>
+</div>
