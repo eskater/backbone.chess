@@ -1,4 +1,4 @@
-define(function () { 
+define(['backbone'], function (Backbone) {
 	return Backbone.View.extend({
 		el: '.messenger',
 		timeout: null,
@@ -10,15 +10,15 @@ define(function () {
 		},
 		show: function (text, timeout) {
 			this.$el.html(text);
-			
+
 			this.centralize();
-			
+
 			this.$el.fadeIn(100);
-			
+
 			if(this.timeout){
 				clearTimeout(this.timeout);
 			}
-			
+
 			this.timeout = setTimeout(this.hide.bind(this), timeout || 3000);
 		},
 		hide: function () {

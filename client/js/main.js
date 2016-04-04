@@ -15,9 +15,9 @@ requirejs.config({
 		application: 'application/chess'
     },
 	shim: {
-		/*resource: {
-			deps: ['vendor1', 'vendor2']
-		}*/
+		backbone: {
+			deps: ['underscore']
+		}
 	}
 });
 

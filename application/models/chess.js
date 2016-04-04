@@ -1,55 +1,94 @@
-define(['models/router', 'models/fen', 'collections/board', 'collections/events', 'collections/players'], function(Router, Fen, Board, Events, Players){
-	return Router.extend({
-        initialize: function() {
-            this.collectionBoard = new Board();
-            this.collectionEvents = new Events();
-            this.collectionPlayers = new Players();
-
-            this.listenTo(this.board(), 'change:position', this.position);
-            this.players().listenTo(this.board(), 'change:position', this.players().move);
-
-            this.initializeFen();
-            this.initializeEvents();
-			this.initializeWebSocket();
+define(['backbone', 'models/fen', 'models/game/blitz', 'collections/board', 'collections/events', 'collections/players'], function (Backbone, Fen, Blitz, Board, Events, Players) {
+	return Backbone.Model.extend({
+		attributes: {
+            fen: null,
+            pat: null,
+            shah: null,
+            game: null,
+            board: null,
+            events: null,
+            players: null,
+            checkmate: null,
+            kingdanger: null,
         },
-		fen: function() {
-            return this.modelFen;
+        defaults: {
+            pat: false,
+            shah: false,
+			checkmate: false,
+            checkmate: false,
+            kingdanger: false,
+        },
+        initialize: function(game) {
+			this.board(new Board());
+			this.events(new Events());
+			this.players(new Players());
+			this.fen(new Fen({board: this.board(), players: this.players(), notation: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}));
+
+			this.initializeGame(game);
+			this.initializeEvents();
+
+			this.listenTo(this.board(), 'change:position', this.position);
+        },
+		fen: function(fen) {
+            if (fen) {
+                this.set('fen', fen);
+
+                return this;
+            }
+
+            return this.get('fen');
         },
 		game: function(game) {
-			if (game) {
-				this.modelGame = game;
+            if (game) {
+                this.set('game', game);
 
-				return this;
+                return this;
+            }
+
+			return this.get('game');
+        },
+        board: function(board) {
+            if (board) {
+                this.set('board', board);
+
+                return this;
+            }
+
+            return this.get('board');
+        },
+        events: function(events) {
+            if (events) {
+                this.set('events', events);
+
+                return this;
+            }
+
+            return this.get('events');
+        },
+        players: function(players) {
+            if (players) {
+                this.set('players', players);
+
+                return this;
+            }
+
+            return this.get('players');
+        },
+		initializeGame: function(game) {
+			switch (game) {
+				case 'blitz':
+					this.game(new Blitz(this));
+
+					break;
 			}
-
-            return this.modelGame;
-        },
-        board: function() {
-            return this.collectionBoard;
-        },
-        events: function() {
-            return this.collectionEvents;
-        },
-        players: function() {
-            return this.collectionPlayers;
-        },
-        initializeFen: function() {
-            this.modelFen = new Fen({
-                board: this.board(),
-                players: this.players(),
-                notation: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-            });
-        },
+		},
         initializeEvents: function() {
             this.events().add([{
                 name: 'kingdanger',
                 board: this.board(),
                 events: this.events(),
                 handler: function(event, events) {
-                    event.set({
-                        enemies: [],
-                        saviors: []
-                    });
+                    event.set({enemies: [], saviors: []});
 
                     _.each(event.get('board').where({
                         type: 'king'
@@ -120,9 +159,7 @@ define(['models/router', 'models/fen', 'collections/board', 'collections/events'
                 board: this.board(),
                 events: this.events(),
                 handler: function(event, events) {
-                    event.set({
-                        enemies: []
-                    });
+                    event.set({enemies: []});
 
                     if (events.event('shah').get('enemies').length > 0) {
                         if (events.event('shah').get('king').waypoints().length < 1) {
@@ -146,15 +183,10 @@ define(['models/router', 'models/fen', 'collections/board', 'collections/events'
                 board: this.board(),
                 events: this.events(),
                 handler: function(event, events) {
-                    event.set({
-                        color: []
-                    });
+                    event.set({color: []});
 
                     if (events.event('shah').get('enemies').length < 1) {
-                        var pat = {
-                            white: true,
-                            black: true
-                        };
+                        var pat = {white: true, black: true};
 
                         for (var color in pat) {
                             event.get('board').where({
@@ -188,15 +220,10 @@ define(['models/router', 'models/fen', 'collections/board', 'collections/events'
 
             this.events().listenTo(this.board(), 'change:position', this.events().check);
         },
-		initializeWebSocket: function() {
-
-		},
         pat: function(event) {
-            _.invoke(event.get('board').models, 'set', {
-                active: false
-            });
+            _.invoke(event.get('board').models, 'set', {active: false});
 
-            this.setpat = true;
+            this.set('pat', true).trigger('pat', this);
         },
         shah: function(event) {
             var allowable = [];
@@ -215,22 +242,18 @@ define(['models/router', 'models/fen', 'collections/board', 'collections/events'
                 allowable: allowable
             });
 
-            this.setshah = true;
+            this.set('shah', true).trigger('shah', this);
         },
         checkmate: function(event) {
-            _.invoke(event.get('board').models, 'set', {
-                active: false
-            });
+            _.invoke(event.get('board').models, 'set', {active: false});
 
-            this.setcheckmate = true;
+            this.set('checkmate', true).trigger('checkmate', this);
         },
         position: function(figure) {
-            if (this.setshah || this.kingdanger) {
-                _.invoke(figure.board().models, 'set', {
-                    allowable: []
-                });
+            if (this.get('shah') || this.get('kingdanger')) {
+                _.invoke(figure.board().models, 'set', {allowable: []});
 
-                this.setshah = this.kingdanger = false;
+                this.set({shah: false, kingdanger: false});
             }
         },
         kingdanger: function(event) {
@@ -250,10 +273,13 @@ define(['models/router', 'models/fen', 'collections/board', 'collections/events'
                 savior.set('allowable', allowable);
             });
 
-            this.kingdanger = true;
+            this.set('kingdanger', true).trigger('kingdanger', this);
         },
         ready: function() {
-            return !this.setpat && !this.setcheckmate;
+            return !this.get('pat') && !this.get('checkmate');
+        },
+        sync: function () {
+            return false;
         }
-	});
+    });
 });

@@ -1,4 +1,4 @@
-define(['locale', 'views/messenger'], function (LOCALE, Messenger) {
+define(['backbone', 'locale', 'views/messenger'], function (Backbone, LOCALE, Messenger) {
 	if (!application) {
 		var Application = Backbone.Model.extend({
 			attributes: {
@@ -42,30 +42,11 @@ define(['locale', 'views/messenger'], function (LOCALE, Messenger) {
 			showerror: function (message, timeout) {
 				this.get('messenger').show(this.gettext(message), timeout || 3000);
 			},
-			injectprice: function (price) {
-				if(typeof price == 'string'){
-					return parseFloat(price.replace(/[\,]/g, '.').replace(/[^\d\.]/g, ''));
-				}
-
-				return price;
-			},
-			getcurrency: function () {
-				return '<span class="tng">тнг</span>';
-			},
 			isrequesterror: function (response) {
 				return _.keys(response).indexOf('error') > -1;
 			},
 			isrequestsuccess: function (response) {
 				return _.keys(response).indexOf('error') < 0;
-			},
-			buildRequestByParams: function (params, request) {
-				var uri = '';
-
-				for(var i in params){
-					uri += _.template('<%=chain%><%=key%>=<%=value%>').call(this, {key: i, value: encodeURIComponent(params[i]), chain: uri ? '&' : '?'});
-				}
-
-				return typeof request != 'undefined' ? request + uri : this.get('request') + uri;
 			}
 		});
 

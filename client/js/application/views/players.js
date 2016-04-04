@@ -1,4 +1,4 @@
-define(['requiretext!templates/player.html'], function (Player) {
+define(['Backbone', 'requiretext!templates/player.html'], function (Backbone, Player) {
 	return Backbone.View.extend({
         initialize: function() {
             this.setElement(this.$('.players'));

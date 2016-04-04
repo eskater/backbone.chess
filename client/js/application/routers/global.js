@@ -1,7 +1,7 @@
-define(function(){
+define(['backbone'], function (Backbone) {
 	return Backbone.Router.extend({
 		routes: {
-			'chess/': chess
+			'chess/': 'chess'
 		},
 		initialize: function() {
 			require(['views/common'], function (Common) {
@@ -11,13 +11,12 @@ define(function(){
 			this.chess();
 		},
 		chess: function() {
-			require(['routers/chess', 'models/game/blitz', 'models/transport/websocket', 'views/chess'], function (Chess, Game, Transport, View) {
-				var chess = new Chess(),
+			require(['models/chess', 'models/transport/websocket', 'views/chess'], function (Chess, Transport, View) {
+				var chess = new Chess('blitz'),
 					transport = new Transport('localhost:1337');
 
-				chess.game(new Game(chess)).board().on('change:position', function(figure) {
-	                chess.players().color(figure.invert());
 
+				chess.on('change:position', function(figure) {
 	                transport.send('position', 'change', {previous: figure.previous(), current: figure.position()});
 	            }, this);
 
@@ -67,7 +66,7 @@ define(function(){
 	                name: 'player',
 	                type: 'initialize',
 	                handle: function(color) {
-						chess.players().findWhere({color: color}).set('current', true);
+						chess.players().getByColor(color).set('current', true);
 	                }
 	            });
 
@@ -75,7 +74,7 @@ define(function(){
 	                name: 'player',
 	                type: 'enter',
 	                handle: function(data) {
-						chess.players().findWhere({color: data.color}).set(data);
+						chess.players().getByColor(data.color).set(data);
 	                }
 	            });
 
@@ -83,7 +82,7 @@ define(function(){
 	                name: 'player',
 	                type: 'returned',
 	                handle: function(id) {
-	                    var player = chess.players().findWhere({id: id.toString()});
+	                    var player = chess.players().getById(id.toString());
 
 						if (player) {
 							player.set('online', true);
@@ -94,8 +93,8 @@ define(function(){
 	            transport.push({
 	                name: 'player',
 	                type: 'exit',
-	                handle: function(data) {
-						var player = chess.players().findWhere({id: data.toString()});
+	                handle: function(id) {
+						var player = chess.players().getById(id.toString());
 
 						if (player) {
 							player.set('online', false);

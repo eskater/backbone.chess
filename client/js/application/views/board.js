@@ -1,4 +1,4 @@
-define(['requiretext!templates/board/white.html', 'requiretext!templates/board/black.html'], function (White, Black) {
+define(['backbone', 'requiretext!templates/board/white.html', 'requiretext!templates/board/black.html'], function (Backbone, White, Black) {
 	return Backbone.View.extend({
         initialize: function() {
             this.setElement(this.$('.board'));
@@ -78,7 +78,7 @@ define(['requiretext!templates/board/white.html', 'requiretext!templates/board/b
             this.cell(figure.row(), figure.col()).addClass('board__field_select');
         },
         position: function(figure) {
-            if (!this.model.setshah) {
+            if (!this.model.get('shah')) {
                 this.$('.board__field_shah').removeClass('board__field_shah');
             }
 

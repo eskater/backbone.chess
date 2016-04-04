@@ -4,17 +4,11 @@ define(['models/transport'], function (Transport) {
 			this.set('transport', new WebSocket('ws://%s'.replace(/%s/, address)));
 
 			this.transport().onopen = (function(message) {
-		        this.handle({
-		            _event_name: 'server',
-		            _event_type: 'connect'
-		        });
+		        this.handle({_event_name: 'server', _event_type: 'connect'});
 		    }).bind(this);
 
 		    this.transport().onclose = (function(message) {
-		        this.handle({
-		            _event_name: 'server',
-		            _event_type: 'disconnect'
-		        });
+		        this.handle({_event_name: 'server', _event_type: 'disconnect'});
 		    }).bind(this);
 
 		    this.transport().onmessage = (function(message) {

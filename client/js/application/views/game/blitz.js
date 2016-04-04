@@ -1,4 +1,4 @@
-define(function () {
+define(['backbone'], function (Backbone) {
 	return Backbone.View.extend({
         initialize: function() {
             this.setElement(this.$('.players'));
