@@ -1,14 +1,18 @@
-define(['backbone'], function (Backbone) {
+define(['backbone', 'ws'], function (Backbone, ws) {
 	return Backbone.Model.extend({
 		attributes: {
+			port: null,
 			events: null,
 			websocket: null,
         },
 		defaults: {
+			port: 1337,
 			events: [],
 		},
         initialize: function() {
-            this.set('websocket', new WebSocket('ws://%s'.replace(/%s/, address)));
+			var that = this;
+
+            this.set('websocket', new ws.Server(this.get('port')));
 
             this.websocket().on('connection', function(client) {
                 that.handle({

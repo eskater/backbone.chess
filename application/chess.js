@@ -2,20 +2,13 @@ define(['backbone', 'locale', 'models/http'], function (Backbone, LOCALE, Http) 
 	if (!GLOBAL._application) {
 		var Application = Backbone.Model.extend({
 			attributes: {
-				root: null,
-				port: null,
-				http: null,
-				address: null,
 				language: null,
 			},
 			defaults: {
-				root: '/',
-				port: 80,
-				address: '127.0.0.1',
 				language: 'en'
 			},
 			initialize: function() {
-				this.set('http', new Http({address: this.get('address'), port: this.get('port'), root: this.get('root')}));
+				this.set('http', new Http());
 			},
 			http: function() {
 				return this.get('http');

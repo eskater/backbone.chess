@@ -16,8 +16,12 @@ requirejs.config({
     },
 	shim: {
 		backbone: {
-			deps: ['underscore']
-		}
+			deps: ['jquery', 'underscore'],
+            exports: 'Backbone'
+		},
+        underscore: {
+            exports: '_'
+        }
 	}
 });
 
@@ -28,7 +32,7 @@ requirejs(['jquery', 'underscore', 'backbone'], function (jQuery, _, Backbone) {
         var language = document.documentElement.lang;
 
         require(['application'], function (application) {
-            application.set({root: '/%s/'.replace(/%s/, language), request: '/%s/api/'.replace(/%s/, language), language: language}).start();
+            application.set({root: '/', request: '/', language: language}).start();
         });
     });
 });

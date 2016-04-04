@@ -1,8 +1,8 @@
-define(['underscore', 'backbone', 'http', 'models/http/route'], function (_, Backbone, http, Route) {
+define(['backbone', 'http', 'models/http/router'], function (Backbone, http, Router) {
 	return Backbone.Model.extend({
         attributes: {
             port: null,
-            route: null,
+            router: null,
             address: null
         },
         defaults: {
@@ -10,21 +10,25 @@ define(['underscore', 'backbone', 'http', 'models/http/route'], function (_, Bac
             address: '127.0.0.1'
         },
         initialize: function() {
-            this.route(new Route({root: this.get('root')}));
+            this.router(new Router());
         },
-        route: function(route) {
-            if (route) {
-                this.set('route', route);
+        router: function(router) {
+            if (router) {
+                this.set('router', router);
 
                 return this;
             }
 
-            return this.get('route');
+            return this.get('router');
         },
         start: function() {
             http.createServer((function(request, response) {
-                this.route().handle(request, response);
-            }).bind(this)).listen(_.template('<%=address%>:<%=port%>', {address: this.get('address'), port: this.get('port')}));
+				this.trigger('http.request', request);
+
+                this.router().handle(request, response);
+            }).bind(this)).listen(this.get('port'), this.get('address'));
+
+			return this;
         }
     });
 });
