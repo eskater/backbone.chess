@@ -28,17 +28,17 @@ requirejs.config({
 });
 
 requirejs(['jquery', 'underscore', 'backbone', 'application'], function (jQuery, _, Backbone, application) {
-    application.http().router().set('root', './backbone.chess/client/').push({
+    application.http().router().push({
         url: '^/chess/$',
         get: function(params, request, response, callback) {
             requirejs(['text!templates/form.html'], function(Form) {
-                callback(Form);
+                callback(_.template(Form).call(this, params));
             });
         },
-        post: function(params, request, response, callback) {
-            this.get.apply(this, arguments);
+        post: function(params) {
+            return this.get.apply(this, arguments);
         }
-    });
+    }).set('root', './backbone.chess/client/');
 
     application.start();
 });
