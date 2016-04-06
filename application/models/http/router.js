@@ -1,24 +1,23 @@
 define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'application'], function (querystring, _, Backbone, fs, url, mime, application) {
 	return Backbone.Model.extend({
         attributes: {
-            root: null,
-            index: null,
+			http: null,
             rules: null
         },
         defaults: {
-            root: 'client/',
-            index: 'index.html',
             rules: []
         },
-        initialize: function() {
-
+        initialize: function(http) {
+			this.http(http);
         },
-		path: function(path) {
-			if (path == '/') {
-				return this.get('root') + this.get('index');
+		http: function(http) {
+			if (http) {
+				this.set('http', http);
+
+				return this;
 			}
 
-			return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
+			return this.get('http');
 		},
         push: function(rule) {
             this.rules().push(rule);
@@ -34,10 +33,11 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 
 			return this.get('rules');
 		},
-		/** stinky method */
-        handle: function(request, response) {
+        handle: function(request, response, callback) {
 			var status = 200,
-                header = {'Content-Type': 'text/html'};
+                headers = {
+					'Content-Type': 'text/html'
+				};
 
             var rules = this.get('rules'),
 				content = null;
@@ -77,28 +77,28 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 				if (content) {
 					switch (typeof content) {
 						case 'function':
-							var result = content.call(rules[i], params, request, response, (function(content, restatus, reheader) {
-								this.response(response, content,  restatus || status, reheader || header);
+							var result = content.call(rules[i], params, request, response, (function(content, restatus, reheaders) {
+								callback.call(this, content,  restatus || status, reheaders || headers);
 							}).bind(this));
 
 							if (result) {
-								this.response(response, result, status, header);
+								callback.call(this, result, status, headers);
 							}
 
 							break;
 						default:
-							this.response(response, content, status, header);
+							callback.call(this, content, status, headers);
 					}
 	            } else {
 					try {
-						header['Content-Type'] = mime.lookup(this.path(request.url));
+						headers['Content-Type'] = mime.lookup(this.http().path(request.url));
 
-	                    content = fs.readFileSync(this.path(request.url));
+	                    content = fs.readFileSync(this.http().path(request.url));
 	                } catch (error) {
 	                    status = 404;
 	                }
 
-					this.response(response, content, status, header);
+					callback.call(this, content, status, headers);
 				}
 			}).bind(this);
 
@@ -116,17 +116,6 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 					end.call(this);
 				});
 			}
-        },
-		response: function(response, content, status, header) {
-			response.writeHead(status, header);
-
-			if (status == 200) {
-				response.write(content);
-			} else {
-				response.write(fs.readFileSync(this.path('%s.html'.replace(/%s/, status))));
-			}
-
-			response.end();
-		}
+        }
     });
 });
