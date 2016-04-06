@@ -2,8 +2,8 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
     if (!GLOBAL._template) {
         var Template = Backbone.Model.extend({
     		attributes: {
+                mets: null,
                 title: null,
-                metas: null,
                 scheme: null,
                 styles: null,
                 content: null,
@@ -12,8 +12,8 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
                 components: null
             },
             defaults: {
+                mets: [],
                 title: 'Page',
-                metas: [],
                 scheme: 'index',
                 styles: [],
                 content: '',
@@ -43,18 +43,18 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
                 return this.get('scheme');
             },
             meta: function(meta) {
-                this.metas().push(meta);
+                this.mets().push(meta);
 
                 return this;
             },
-            metas: function(metas) {
-                if (metas) {
-                    this.set('metas', metas);
+            mets: function(mets) {
+                if (mets) {
+                    this.set('styles', _.union(this.get('mets'), mets));
 
                     return this;
                 }
 
-                return this.get('metas');
+                return this.get('mets');
             },
             style: function(style) {
                 this.styles().push(style);
@@ -64,7 +64,7 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
             },
             styles: function(styles) {
                 if (styles) {
-                    this.set('styles', styles);
+                    this.set('styles', _.union(this.get('styles'), styles));
 
                     return this;
                 }
@@ -78,7 +78,7 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
             },
             scripts: function(scripts) {
                 if (scripts) {
-                    this.set('scripts', scripts);
+                    this.set('scripts', _.union(this.get('scripts'), scripts));
 
                     return this;
                 }
@@ -115,16 +115,16 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
                 return components[name].call(this);
             },
             htmlhead: function() {
-                return this.htmlmetas() + this.htmlstyles() + this.htmlscripts();
+                return this.htmlmets() + this.htmlstyles() + this.htmlscripts();
             },
-            htmlmetas: function() {
-                var metas = '';
+            htmlmets: function() {
+                var mets = '';
 
-                _.each(this.metas(), function(meta) {
-                    metas += _.template('<meta<%=_.map(_.pairs(data.attributes || {}), function(item) { return \' \'+item[0]+\'="\'+item[1]+\'"\'; }).join(\' \')%>/>\n').call(this, {data: meta});
+                _.each(this.mets(), function(meta) {
+                    mets += _.template('<meta<%=_.map(_.pairs(data.attributes || {}), function(item) { return \' \'+item[0]+\'="\'+item[1]+\'"\'; }).join(\' \')%>/>\n').call(this, {data: meta});
                 });
 
-                return metas;
+                return mets;
             },
             htmlstyles: function() {
                 var styles = '';
@@ -157,8 +157,8 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
             },
             reset: function() {
                 this.set({
+                    mets: [],
                     title: 'Page',
-                    metas: [],
                     scheme: 'index',
                     styles: [],
                     content: '',

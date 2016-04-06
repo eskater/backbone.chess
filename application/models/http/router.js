@@ -55,10 +55,12 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 				var urlvalues = [];
 
 				if ((urlvalues = urlpath.pathname.match(new RegExp(urltokens)))) {
-					urlvalues = urlvalues.slice(1, urlmatches.length + 1);
+					if (urlmatches) {
+						urlvalues = urlvalues.slice(1, urlmatches.length + 1);
 
-					for (var i in urlmatches) {
-						params['get'][urlmatches[i]] = urlvalues[i];
+						for (var i in urlmatches) {
+							params['get'][urlmatches[i]] = urlvalues[i];
+						}
 					}
 
 					if (urlpath.query) {

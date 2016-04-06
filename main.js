@@ -31,11 +31,11 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
     application.http().router().push({
         url: '^/chess/$',
         get: function(params, request, response, callback) {
-            return template.scheme('chess').style({
+            return template.scheme('chess').styles([{
                 path: '/css/normalize.css',
-            }).style({
+            }, {
                 path: '/css/chess.css',
-            }).script({
+            }]).script({
                 path: '/js/vendor/require.js',
                 attributes: {
                     'data-main': '/js/main'
@@ -45,9 +45,7 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
     }).push({
         url: '^/hello/(name:\\w{4,})/(id:\\d+)/$',
         get: function(params, request, response, callback) {
-            console.log(params);
-
-            return template.scheme('hello').title('hello world').render();
+            return template.scheme('hello').title('hello %s'.replace(/%s/, params.get.name)).render();
         }
     }).set('root', './client/');
 

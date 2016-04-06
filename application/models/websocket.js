@@ -15,16 +15,10 @@ define(['backbone', 'ws'], function (Backbone, ws) {
             this.set('websocket', new ws.Server(this.get('port')));
 
             this.websocket().on('connection', function(client) {
-                that.handle({
-                    _event_name: 'client',
-                    _event_type: 'connect'
-                }, client);
+                that.handle({_event_name: 'client', _event_type: 'connect'}, client);
 
                 client.on('close', function(event) {
-                    that.handle({
-                        _event_name: 'client',
-                        _event_type: 'disconnect'
-                    }, client);
+                    that.handle({_event_name: 'client', _event_type: 'disconnect'}, client);
                 });
 
                 client.on('message', function(event) {
@@ -64,11 +58,15 @@ define(['backbone', 'ws'], function (Backbone, ws) {
                 event._data = JSON.stringify(event._data);
             }
 
+			var tokens = JSON.stringify(event);
+
             if (client) {
-                client.send(JSON.stringify(event));
+                client.send(tokens);
             } else {
-                for (var i in this.websocket().clients) {
-                    this.websocket().clients[i].send(JSON.stringify(event));
+				var clients = this.clients();
+
+                for (var i in clients) {
+                    clients[i].send(tokens);
                 }
             }
         },
