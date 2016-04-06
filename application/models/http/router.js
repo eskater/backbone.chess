@@ -44,8 +44,6 @@ define(['underscore', 'backbone', 'fs', 'url', 'mime'], function (_, Backbone, f
             for (var i in rules) {
                 var urlpath = url.parse(request.url);
 
-				console.log(request);
-
 				if (urlpath.pathname.match(new RegExp(rules[i].url))) {
 					var method = request.method.toLowerCase();
 
