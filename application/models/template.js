@@ -94,6 +94,9 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
 
                 return this.get('content');
             },
+            include: function(scheme, params) {
+                return _.template(fs.readFileSync(application.path('application/templates/%s.html'.replace(/%s/, scheme))).toString()).call(this, {template: this, data: params})
+            },
             template: function(template) {
                 if (template) {
                     this.set('template', template);

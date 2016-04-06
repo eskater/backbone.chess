@@ -30,7 +30,7 @@ requirejs.config({
 requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
     application.http().set('root', './client/').router().push({
         url: '^/chess/$',
-        get: function(params, request, response, callback) {
+        get: function(http) {
             return template.scheme('chess').styles([{path: '/css/normalize.css',}, {path: '/css/chess.css',}]).script({
                 path: '/js/vendor/require.js',
                 attributes: {
@@ -40,8 +40,8 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
         }
     }).push({
         url: '^/hello/(name:\\w{4,})/(id:\\d+)/$',
-        get: function(params, request, response, callback) {
-            return template.scheme('hello').title('hello %s'.replace(/%s/, params.get.name)).render();
+        all: function(http) {
+            return template.scheme('hello').title('hello username').render();
         }
     });
 

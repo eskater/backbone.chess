@@ -33,20 +33,19 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 
 			return this.get('rules');
 		},
-        handle: function(request, response, callback) {
-			var status = 200,
-                headers = {
-					'Content-Type': 'text/html'
-				};
+        handle: function() {
+			var http = this.http(),
+				request = http.request();
 
             var rules = this.get('rules'),
 				content = null;
 
-			var params = {get: {}, post: {}},
-				method = request.method.toLowerCase();
-
 			var urlpath = url.parse(request.url),
 				databuffer = '';
+
+			var method = request.method.toLowerCase();
+
+			http.header('Content-Type', 'text/html');
 
             for (var i in rules) {
 				var urltokens = rules[i].url.replace(/\(\w+\:(.+?)\)/g, '($1)'),
@@ -59,12 +58,12 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 						urlvalues = urlvalues.slice(1, urlmatches.length + 1);
 
 						for (var i in urlmatches) {
-							params['get'][urlmatches[i]] = urlvalues[i];
+							http.getparam(urlmatches[i], urlvalues[i]);
 						}
 					}
 
 					if (urlpath.query) {
-						params['get'] = _.extend({}, params['get'], _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); })));
+						http.getparams(_.extend({}, http.getparams(), _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); }))));
 					}
 
 					if (!(content = rules[i][method]) && rules[i]['all']) {
@@ -77,28 +76,24 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 				if (content) {
 					switch (typeof content) {
 						case 'function':
-							var result = content.call(rules[i], params, request, response, (function(content, restatus, reheaders) {
-								callback.call(this, content,  restatus || status, reheaders || headers);
+							var result = content.call(rules[i], http, (function(content) {
+								http.content(content).end();
 							}).bind(this));
 
 							if (result) {
-								callback.call(this, result, status, headers);
+								http.content(result).end();
 							}
 
 							break;
 						default:
-							callback.call(this, content, status, headers);
+							http.content(content).end();
 					}
 	            } else {
 					try {
-						headers['Content-Type'] = mime.lookup(this.http().path(request.url));
-
-	                    content = fs.readFileSync(this.http().path(request.url));
+						http.header('Content-Type', mime.lookup(http.path(request.url))).content(fs.readFileSync(http.path(request.url))).end();
 	                } catch (error) {
-	                    status = 404;
+	                    http.status(404).end();
 	                }
-
-					callback.call(this, content, status, headers);
 				}
 			}).bind(this);
 
@@ -109,12 +104,11 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 					databuffer += data;
 				});
 
-				request.on('end', function() {
-					params[method] = querystring.parse(databuffer);
-					params['request'] = _.extend({}, params['get'], params[method]);
+				request.on('end', (function() {
+					http.postparams(querystring.parse(databuffer));
 
 					end.call(this);
-				});
+				}).bind(this));
 			}
         }
     });

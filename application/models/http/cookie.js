@@ -3,14 +3,16 @@ define(['underscore', 'backbone'], function (_, Backbone) {
         attributes: {
             http: null,
             tokens: null,
-            params: null
+            params: null,
+			newparams: null
         },
         defaults: {
-            tokens: ''
-            params: {}
+            tokens: '',
+            params: {},
+			newparams: []
         },
         initialize: function(http, tokens) {
-			this.http(http).tokens(tokens);
+			this.http(http).tokens(http.request().headers.cookie);
         },
 		http: function(http) {
 			if (http) {
@@ -27,6 +29,8 @@ define(['underscore', 'backbone'], function (_, Backbone) {
             if (typeof value != 'undefined') {
                 params[name] = value;
 
+				this.get('newparams').push(name);
+
                 return this;
             }
 
@@ -34,7 +38,8 @@ define(['underscore', 'backbone'], function (_, Backbone) {
         },
         params: function(params) {
 			if (params) {
-				this.set('params', params);
+				this.set('params', _.extends({}, this.get('params'), params));
+				this.set('newparams', _.union( this.get('newparams'), _.keys(params)));
 
 				return this;
 			}
@@ -43,12 +48,19 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 		},
         tokens: function(tokens) {
 			if (tokens) {
-				this.set('tokens', tokens).params(_.object(_.map(urlpath.query.split(';'), function(tokens) { return tokens.split('='); })));
+				this.set('tokens', tokens).params(_.object(_.map(tokens.split(';'), function(tokens) { return tokens.split('='); })));
 
 				return this;
 			}
 
-			return _.map(_.pairs(this.params()), function(item) { return _.template('<%=key%>=<%=value%>;').call(this, {key: item[0], value: item[1]}); }).join('');
+			return _.map(_.pairs(this.params()), function(item) {
+				return _.template('<%=key%>=<%=value%>;').call(this, {key: item[0], value: item[1]});
+			}).join('');
 		},
+		newtokens: function() {
+			return _.map(_.pairs(_.pick(this.params()), this.get('newparams')), function(item) {
+				return _.template('<%=key%>=<%=value%>;').call(this, {key: item[0], value: item[1]});
+			}).join('');
+		}
     });
 });

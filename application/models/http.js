@@ -1,23 +1,45 @@
 define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/http/cookie', 'models/http/session'], function (_, Backbone, http, fs, Router, Cookie, Session) {
 	return Backbone.Model.extend({
         attributes: {
+			get: null,
+			post: null,
             port: null,
             root: null,
             index: null,
+			status: null,
             router: null,
 			cookie: null,
+			content: null,
+			request: null,
+			headers: null,
             address: null,
 			session: null
         },
         defaults: {
+			get: {},
+			post: {},
             port: 80,
 			root: 'client/',
             index: 'index.html',
+			status: 200,
+			content: '',
+			headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
             address: '127.0.0.1'
         },
         initialize: function() {
-            this.router(new Router(this)).cookie(new Cookie(this)).session(new Session(this));
+            this.router(new Router(this));
         },
+		end: function() {
+			this.response().writeHead(this.status(), this.headers());
+
+			if (this.status() == 200) {
+				this.response().write(this.content());
+			} else {
+				this.response().write(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.status()))));
+			}
+
+			this.response().end();
+		},
 		path: function(path) {
 			if (path == '/') {
 				return this.get('root') + this.get('index');
@@ -25,6 +47,13 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
 		},
+        start: function() {
+            http.createServer((function(request, response) {
+				this.request(request).response(response).handle();
+            }).bind(this)).listen(this.get('port'), this.get('address'));
+
+			return this;
+        },
         router: function(router) {
             if (router) {
                 this.set('router', router);
@@ -34,14 +63,23 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
             return this.get('router');
         },
-		handle: function(request, response) {
-			this.router().handle(request, response, (function(content, status, headers) {
-				headers = _.extend({}, this.headers(request), headers);
+		status: function(status) {
+			if (status) {
+                this.set('status', status);
 
-				this.response(response, content, status, headers);
-			}).bind(this));
+                return this;
+            }
+
+            return this.get('status');
 		},
-		cookie: function(headers) {
+		handle: function() {
+			if (!this.cookie()) {
+				this.cookie(new Cookie(this));
+			}
+
+			this.router().handle();
+		},
+		cookie: function(cookie) {
 			if (cookie) {
                 this.set('cookie', cookie);
 
@@ -50,7 +88,27 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
             return this.get('cookie');
 		},
-		session: function() {
+		header: function(name, value) {
+			var headers = this.headers();
+
+            if (typeof value != 'undefined') {
+                headers[name] = value;
+
+                return this;
+            }
+
+            return headers[name];
+		},
+        headers: function(headers) {
+			if (headers) {
+				this.set('headers', _.extends({}, this.get('headers'), headers));
+
+				return this;
+			}
+
+			return this.get('headers');
+		},
+		session: function(session) {
 			if (session) {
 				this.set('session', session);
 
@@ -59,36 +117,72 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return this.get('session');
 		},
-		headers: function(request) {
-			var cookie,
-				headers = {
-					'Server': 'Node.js',
-					'Content-Type': 'text/html'
-				};
+		content: function(content) {
+			if (content) {
+				this.set('content', content);
 
-			if ((cookie = this.cookie(request.headers))) {
-				headers['Set-Cookie'] = cookie;
+				return this;
 			}
 
-			return headers;
+			return this.get('content');
 		},
-		response: function(response, content, status, headers) {
-			response.writeHead(status, headers);
+		request: function(request) {
+			if (request) {
+                this.set('request', request);
 
-			if (status == 200) {
-				response.write(content);
-			} else {
-				response.write(fs.readFileSync(this.path('%s.html'.replace(/%s/, status))));
+                return this;
+            }
+
+            return this.get('request');
+		},
+		response: function(response) {
+			if (response) {
+                this.set('response', response);
+
+                return this;
+            }
+
+            return this.get('response');
+		},
+		getparam: function(name, value) {
+			var gets = this.getparams();
+
+			if (typeof value != 'undefined') {
+				gets[name] = value;
+
+				return this;
 			}
 
-			response.end();
+			return gets[name];
 		},
-        start: function() {
-            http.createServer((function(request, response) {
-				this.handle(request, response);
-            }).bind(this)).listen(this.get('port'), this.get('address'));
+		getparams: function(gets) {
+			if (gets) {
+				this.set('get', _.extends({}, this.get('get'), gets));
 
-			return this;
-        }
+				return this;
+			}
+
+			return this.get('get');
+		},
+		postparam: function(name, value) {
+			var posts = this.postparams();
+
+			if (typeof value != 'undefined') {
+				posts[name] = value;
+
+				return this;
+			}
+
+			return posts[name];
+		},
+		postparams: function(posts) {
+			if (posts) {
+				this.set('post', _.extends({}, this.get('post'), posts));
+
+				return this;
+			}
+
+			return this.get('post');
+		},
     });
 });
