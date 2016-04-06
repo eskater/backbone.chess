@@ -1,4 +1,4 @@
-define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function (querystring, _, Backbone, fs, url, mime) {
+define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'application'], function (querystring, _, Backbone, fs, url, mime, application) {
 	return Backbone.Model.extend({
         attributes: {
             root: null,
@@ -13,13 +13,13 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
         initialize: function() {
 
         },
-        path: function(path) {
-            if (path == '/') {
-                return this.get('root') + this.get('index');
-            }
+		path: function(path) {
+			if (path == '/') {
+				return this.get('root') + this.get('index');
+			}
 
-            return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
-        },
+			return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
+		},
         push: function(rule) {
             this.rules().push(rule);
 

@@ -7,7 +7,7 @@ requirejs.config({
         }
     },
     paths: {
-        text: '../node_modules/text/text',
+        text: './vendor/text',
         views: './application/views',
 		models: './application/models',
 		locale: './application/locale',
@@ -27,18 +27,27 @@ requirejs.config({
 	}
 });
 
-requirejs(['jquery', 'underscore', 'backbone', 'application'], function (jQuery, _, Backbone, application) {
+requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
     application.http().router().push({
         url: '^/chess/$',
         get: function(params, request, response, callback) {
-            requirejs(['text!templates/form.html'], function(Form) {
-                callback(_.template(Form).call(this, params));
-            });
-        },
-        post: function(params) {
-            return this.get.apply(this, arguments);
+            return template.scheme('chess').style({
+                path: '/css/normalize.css',
+            }).style({
+                path: '/css/chess.css',
+            }).script({
+                path: '/js/vendor/require.js',
+                attributes: {
+                    'data-main': '/js/main'
+                }
+            }).title('Chess online').render();
         }
-    }).set('root', './backbone.chess/client/');
+    }).push({
+        url: '^/hello/$',
+        get: function(params, request, response, callback) {
+            return template.scheme('hello').title('hello world').render();
+        }
+    }).set('root', './client/');
 
     application.start();
 });

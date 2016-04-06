@@ -2,14 +2,23 @@ define(['backbone', 'locale', 'models/http'], function (Backbone, LOCALE, Http) 
 	if (!GLOBAL._application) {
 		var Application = Backbone.Model.extend({
 			attributes: {
+				root: null,
 				language: null,
 			},
 			defaults: {
+				root: './',
 				language: 'en'
 			},
 			initialize: function() {
 				this.set('http', new Http());
 			},
+	        path: function(path) {
+	            if (path == '/') {
+	                return this.get('root') + this.get('index');
+	            }
+
+	            return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
+	        },
 			http: function() {
 				return this.get('http');
 			},
