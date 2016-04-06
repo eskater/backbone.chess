@@ -34,6 +34,7 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 
 			return this.get('rules');
 		},
+		/** stinky method */
         handle: function(request, response) {
 			var status = 200,
                 header = {'Content-Type': 'text/html'};
@@ -48,9 +49,20 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 				databuffer = '';
 
             for (var i in rules) {
-                if (urlpath.pathname.match(new RegExp(rules[i].url))) {
+				var urltokens = rules[i].url.replace(/\(\w+\:(.+?)\)/g, '($1)'),
+					urlmatches = rules[i].url.match(/(?!=\()(\w+)(?=\:.+?\))/g);
+
+				var urlvalues = [];
+
+				if ((urlvalues = urlpath.pathname.match(new RegExp(urltokens)))) {
+					urlvalues = urlvalues.slice(1, urlmatches.length + 1);
+
+					for (var i in urlmatches) {
+						params['get'][urlmatches[i]] = urlvalues[i];
+					}
+
 					if (urlpath.query) {
-						params['get'] = _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); }));
+						params['get'] = _.extend({}, params['get'], _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); })));
 					}
 
 					if (!(content = rules[i][method]) && rules[i]['all']) {

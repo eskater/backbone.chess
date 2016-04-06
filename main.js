@@ -43,8 +43,10 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
             }).title('Chess online').render();
         }
     }).push({
-        url: '^/hello/$',
+        url: '^/hello/(name:\\w{4,})/(id:\\d+)/$',
         get: function(params, request, response, callback) {
+            console.log(params);
+
             return template.scheme('hello').title('hello world').render();
         }
     }).set('root', './client/');
