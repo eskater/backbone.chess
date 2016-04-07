@@ -58,12 +58,12 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 						urlvalues = urlvalues.slice(1, urlmatches.length + 1);
 
 						for (var i in urlmatches) {
-							http.getparam(urlmatches[i], urlvalues[i]);
+							http.get(urlmatches[i], urlvalues[i]);
 						}
 					}
 
 					if (urlpath.query) {
-						http.getparams(_.extend({}, http.getparams(), _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); }))));
+						http.gets(_.extend({}, http.gets(), _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); }))));
 					}
 
 					if (!(content = rules[i][method]) && rules[i]['all']) {
@@ -105,7 +105,7 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'applicati
 				});
 
 				request.on('end', (function() {
-					http.postparams(querystring.parse(databuffer));
+					http.posts(querystring.parse(databuffer));
 
 					end.call(this);
 				}).bind(this));

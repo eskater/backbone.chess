@@ -1,3 +1,4 @@
+/** Mini bad implementation http server */
 define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/http/cookie', 'models/http/session'], function (_, Backbone, http, fs, Router, Cookie, Session) {
 	return Backbone.Model.extend({
         attributes: {
@@ -13,7 +14,8 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			request: null,
 			headers: null,
             address: null,
-			session: null
+			session: null,
+			cookieid: null,
         },
         defaults: {
 			get: {},
@@ -24,12 +26,15 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			status: 200,
 			content: '',
 			headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
-            address: '127.0.0.1'
+            address: '127.0.0.1',
+			cookieid: '_cookie_id',
         },
         initialize: function() {
             this.router(new Router(this));
         },
 		end: function() {
+			this.cookie().headers();
+
 			this.response().writeHead(this.status(), this.headers());
 
 			if (this.status() == 200) {
@@ -40,53 +45,60 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			this.response().end();
 		},
+		root: function(root) {
+            if (root) {
+                this.setattr('root', root);
+
+                return this;
+            }
+
+            return this.getattr('root');
+        },
 		path: function(path) {
 			if (path == '/') {
-				return this.get('root') + this.get('index');
+				return this.root() + this.getattr('index');
 			}
 
-			return path.match(/^\//) ? path.replace(/^\//, this.get('root')) : this.get('root') + path;
+			return path.match(/^\//) ? path.replace(/^\//, this.root()) : this.root() + path;
 		},
         start: function() {
             http.createServer((function(request, response) {
 				this.request(request).response(response).handle();
-            }).bind(this)).listen(this.get('port'), this.get('address'));
+            }).bind(this)).listen(this.getattr('port'), this.getattr('address'));
 
 			return this;
         },
         router: function(router) {
             if (router) {
-                this.set('router', router);
+                this.setattr('router', router);
 
                 return this;
             }
 
-            return this.get('router');
+            return this.getattr('router');
         },
 		status: function(status) {
 			if (status) {
-                this.set('status', status);
+                this.setattr('status', status);
 
                 return this;
             }
 
-            return this.get('status');
+            return this.getattr('status');
 		},
 		handle: function() {
-			if (!this.cookie()) {
-				this.cookie(new Cookie(this));
-			}
+			this.cookie(new Cookie(this));
 
 			this.router().handle();
 		},
 		cookie: function(cookie) {
 			if (cookie) {
-                this.set('cookie', cookie);
+                this.setattr('cookie', cookie);
 
                 return this;
             }
 
-            return this.get('cookie');
+            return this.getattr('cookie');
 		},
 		header: function(name, value) {
 			var headers = this.headers();
@@ -99,53 +111,68 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
             return headers[name];
 		},
+		setattr: function() {
+			return Backbone.Model.prototype.set.apply(this, arguments);
+		},
+		getattr: function() {
+			return Backbone.Model.prototype.get.apply(this, arguments);
+		},
         headers: function(headers) {
 			if (headers) {
-				this.set('headers', _.extends({}, this.get('headers'), headers));
+				this.setattr('headers', _.extends({}, this.getattr('headers'), headers));
 
 				return this;
 			}
 
-			return this.get('headers');
+			return this.getattr('headers');
 		},
 		session: function(session) {
 			if (session) {
-				this.set('session', session);
+				this.setattr('session', session);
 
 				return this;
 			}
 
-			return this.get('session');
+			return this.getattr('session');
 		},
 		content: function(content) {
 			if (content) {
-				this.set('content', content);
+				this.setattr('content', content);
 
 				return this;
 			}
 
-			return this.get('content');
+			return this.getattr('content');
 		},
 		request: function(request) {
 			if (request) {
-                this.set('request', request);
+                this.setattr('request', request);
 
                 return this;
             }
 
-            return this.get('request');
+            return this.getattr('request');
 		},
 		response: function(response) {
 			if (response) {
-                this.set('response', response);
+                this.setattr('response', response);
 
                 return this;
             }
 
-            return this.get('response');
+            return this.getattr('response');
 		},
-		getparam: function(name, value) {
-			var gets = this.getparams();
+		cookieid: function(cookieid) {
+			if (cookieid) {
+				this.setattr('cookieid', cookieid);
+
+				return this;
+			}
+
+			return this.getattr('cookieid');
+		},
+		get: function(name, value) {
+			var gets = this.gets();
 
 			if (typeof value != 'undefined') {
 				gets[name] = value;
@@ -155,17 +182,17 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return gets[name];
 		},
-		getparams: function(gets) {
+		gets: function(gets) {
 			if (gets) {
-				this.set('get', _.extends({}, this.get('get'), gets));
+				this.setattr('get', _.extends({}, this.getattr('get'), gets));
 
 				return this;
 			}
 
-			return this.get('get');
+			return this.getattr('get');
 		},
-		postparam: function(name, value) {
-			var posts = this.postparams();
+		post: function(name, value) {
+			var posts = this.posts();
 
 			if (typeof value != 'undefined') {
 				posts[name] = value;
@@ -175,14 +202,14 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return posts[name];
 		},
-		postparams: function(posts) {
+		posts: function(posts) {
 			if (posts) {
-				this.set('post', _.extends({}, this.get('post'), posts));
+				this.setattr('post', _.extends({}, this.getattr('post'), posts));
 
 				return this;
 			}
 
-			return this.get('post');
+			return this.getattr('post');
 		},
     });
 });

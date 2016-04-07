@@ -28,7 +28,7 @@ requirejs.config({
 });
 
 requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
-    application.http().set('root', './client/').router().push({
+    application.http().root('./client/').cookieid('_chess_id').router().push({
         url: '^/chess/$',
         get: function(http) {
             return template.scheme('chess').styles([{path: '/css/normalize.css',}, {path: '/css/chess.css',}]).script({
