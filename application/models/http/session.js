@@ -2,22 +2,25 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 	return Backbone.Model.extend({
         attributes: {
             http: null,
-			data: null
+			data: null,
+			sessid: null,
+			savepath: null
         },
         defaults: {
-			data: {}
+			data: {},
+			savepath: './sessions/'
         },
-        initialize: function(id, http) {
-			this.http(http).initializeData();
+        initialize: function(http, id) {
+			this.http(http).id(id);
         },
 		id: function(id) {
 			if (id) {
-				this.setattr('id', id);
+				this.setattr('sessid', id).initializedata();
 
 				return this;
 			}
 
-			return this.getattr('id');
+			return this.getattr('sessid');
 		},
 		set: function(name, value) {
 			if (typeof name == 'object') {
@@ -35,17 +38,43 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 
 			return data[name];
 		},
-		http: function(http) {
-			if (http) {
-				this.set('http', http);
+		data: function(data, full) {
+			if (data) {
+				if (full) {
+					this.setattr('data', data);
+				} else {
+					this.setattr('data', _.extend({}, this.getattr('data'), data));
+				}
 
 				return this;
 			}
 
-			return this.get('http');
+			return this.getattr('data');
+		},
+		http: function(http) {
+			if (http) {
+				this.setattr('http', http);
+
+				return this;
+			}
+
+			return this.getattr('http');
+		},
+		path: function(path) {
+			return this.getattr('savepath') + path;
 		},
 		save: function() {
+			var list = _.pairs(this.data());
 
+			if (list.length > 0) {
+				try {
+					fs.writeFileSync(this.path('%s.dat'.replace(/%s/, this.id())),  _.map(list, function(item) {
+						return _.template('<%=key%>=<%=value%>').call(this, {key: item[0], value: item[1]});
+					}).join(';'));
+				} catch (error) { }
+			}
+
+			return this;
 		},
 		destroy: function() {
 
@@ -56,8 +85,18 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 		getattr: function() {
 			return Backbone.Model.prototype.get.apply(this, arguments);
 		},
-		initializeData: function() {
+		headers: function() {
 
+		},
+		buildheaders: function() {
+
+		},
+		initializedata: function() {
+			try {
+				var data = fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.id()))).toString();
+
+				this.data(_.object(_.map(data.trim().split(';'), function(item) { return item.trim().split('='); })), true);
+			} catch (error) { }
 		}
     });
 });

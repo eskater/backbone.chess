@@ -40,8 +40,11 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
         }
     }).push({
         url: '^/hello/(name:\\w{4,})/(id:\\d+)/$',
-        all: function(http) {
-            return template.scheme('hello').title('hello username').render();
+        get: function(http) {
+            http.cookie().set('test', 'qwerty');
+            http.session().set('test', 'qwerty');
+
+            return template.scheme('hello').title('hello username').render(http);
         }
     });
 

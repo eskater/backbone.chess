@@ -1,4 +1,4 @@
-define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime', 'application'], function (querystring, _, Backbone, fs, url, mime, application) {
+define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function (querystring, _, Backbone, fs, url, mime) {
 	return Backbone.Model.extend({
         attributes: {
 			http: null,

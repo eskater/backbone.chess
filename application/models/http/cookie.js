@@ -1,40 +1,43 @@
-define(['underscore', 'backbone'], function (_, Backbone) {
+define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone, Session) {
 	return Backbone.Model.extend({
         attributes: {
 			data: null,
 			http: null,
 			isnew: null,
             tokens: null,
-			newdata: null,
+			sessid: null,
+			newdata: null
         },
         defaults: {
             data: {},
 			isnew: false,
             tokens: '',
-			newdata: [],
+			newdata: []
         },
         initialize: function(http) {
-			this.http(http).tokens(http.request().headers.cookie || '').generate();
+			this.http(http).tokens(http.request().headers.cookie || '', true).generate();
         },
 		id: function(id) {
 			if (id) {
-				this.setattr('id', id);
+				this.setattr('sessid', id);
 
-				if (this.get(this.cookieid()) != id) {
+				if (this.isnew()) {
 					this.set(this.cookieid(), id);
 				}
+
+				this.http().session(new Session(this.http(), id));
 
 				return this;
 			}
 
-			return this.getattr('id');
+			return this.getattr('sessid');
 		},
 		get: function(name) {
 			var data = this.data();
 
 			return data[name];
 		},
-		set: function(name, value) {
+		set: function(name, value, expires, path, domain) {
 			if (typeof name == 'object') {
 				return this.setattr.apply(this, arguments);
 			}
@@ -43,17 +46,21 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 
 			data[name] = value;
 
-			if (this.getattr('newdata').indexOf(name) < 0) {
-				this.getattr('newdata').push(name);
-			}
+			this.newdata([name]);
 
 			return this;
 		},
-        data: function(data) {
+        data: function(data, full) {
 			if (data) {
 				this.setattr('data', _.extend({}, this.getattr('data'), data));
 
-				this.setattr('newdata', _.union(this.getattr('newdata'), _.keys(data)));
+				if (full) {
+					this.setattr('data', data);
+				} else {
+					this.setattr('data', _.extend({}, this.getattr('data'), data));
+
+					this.newdata(_.keys(data));
+				}
 
 				return this;
 			}
@@ -78,10 +85,10 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 
 			return this.getattr('isnew');
 		},
-        tokens: function(tokens) {
+        tokens: function(tokens, full) {
 			if (typeof tokens != 'undefined') {
 				if (tokens) {
-					this.setattr('tokens', tokens).data(_.object(_.map(tokens.trim().split(';'), function(tokens) { return tokens.trim().split('='); })));
+					this.setattr('tokens', tokens).data(_.object(_.map(tokens.trim().split(';'), function(tokens) { return tokens.trim().split('='); })), full);
 				}
 
 				return this;
@@ -98,17 +105,29 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 			return Backbone.Model.prototype.get.apply(this, arguments);
 		},
 		headers: function() {
-			var tokens = this.newtokens();
+			var tokens = this.newtokens(),
+				headers = {};
 
 			if (tokens) {
-				this.http().header('Set-Cookie', tokens);
+				headers['Set-Cookie'] = tokens;
 			}
+
+			return headers;
+		},
+		newdata: function(newdata) {
+			if (newdata) {
+				this.setattr('newdata', _.union(this.getattr('newdata'), newdata));
+
+				return this;
+			}
+
+			return this.getattr('newdata');
 		},
 		generate: function() {
 			if (this.get(this.cookieid())) {
 				this.id(this.get(this.cookieid()));
 			} else {
-				this.id(Math.random().toString().substr(10)).isnew(true);
+				this.isnew(true).id(Math.random().toString().substr(10));
 			}
 
 			return this;
@@ -117,13 +136,18 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 			return this.http().cookieid();
 		},
 		newtokens: function() {
-			if (this.getattr('newdata')) {
-				return _.map(_.pairs(_.pick.apply(this, _.union([this.data(), this.getattr('newdata')]))), function(item) {
-					return _.template('<%=key%>=<%=value%>;').call(this, {key: item[0], value: item[1]});
-				}).join('');
+			if (this.newdata()) {
+				var list = _.pairs(_.pick.apply(this, _.union([this.data(), this.newdata()])));
+
+				return _.map(list, function(item) {
+					return _.template('<%=key%>=<%=value%>').call(this, {key: item[0], value: item[1]});
+				}).join(';');
 			}
 
 			return '';
 		},
+		buildheaders: function() {
+			this.http().headers(this.headers());
+		}
     });
 });

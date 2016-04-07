@@ -1,5 +1,5 @@
 /** Mini bad implementation http server */
-define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/http/cookie', 'models/http/session'], function (_, Backbone, http, fs, Router, Cookie, Session) {
+define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/http/cookie'], function (_, Backbone, http, fs, Router, Cookie) {
 	return Backbone.Model.extend({
         attributes: {
 			get: null,
@@ -33,7 +33,8 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
             this.router(new Router(this));
         },
 		end: function() {
-			this.cookie().headers();
+			this.cookie().buildheaders();
+			this.session().buildheaders();
 
 			this.response().writeHead(this.status(), this.headers());
 
@@ -44,6 +45,8 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			}
 
 			this.response().end();
+			this.session().save();
+			this.reset();
 		},
 		root: function(root) {
             if (root) {
@@ -68,6 +71,11 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return this;
         },
+		reset: function() {
+			this.set({content: '', headers: this.defaults.headers, request: null, response: null});
+
+			return this;
+		},
         router: function(router) {
             if (router) {
                 this.setattr('router', router);
@@ -119,7 +127,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 		},
         headers: function(headers) {
 			if (headers) {
-				this.setattr('headers', _.extends({}, this.getattr('headers'), headers));
+				this.setattr('headers', _.extend({}, this.getattr('headers'), headers));
 
 				return this;
 			}
