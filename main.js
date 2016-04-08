@@ -43,6 +43,7 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
         get: function(http) {
             http.cookie().set('test', 'qwerty');
             http.session().set('test', 'qwerty');
+            http.session().set('test2', 'ytrewq');
 
             return template.scheme('hello').title('hello username').render(http);
         }

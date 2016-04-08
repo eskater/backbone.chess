@@ -1,18 +1,17 @@
-define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
+define(['underscore', 'backbone', 'collections/http/item/sessions', 'fs'], function (_, Backbone, Sessions, fs) {
 	return Backbone.Model.extend({
         attributes: {
             http: null,
-			data: null,
 			sessid: null,
-			savepath: null
+			savepath: null,
+			sessions: null,
         },
-        defaults: {
-			data: {},
-			savepath: './sessions/'
-        },
-        initialize: function(http, id) {
-			this.http(http).id(id);
-        },
+        defaults: function() {
+			return {
+				savepath: './sessions/',
+				sessions: new Sessions()
+	        }
+		},
 		id: function(id) {
 			if (id) {
 				this.setattr('sessid', id).initializedata();
@@ -22,34 +21,22 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 
 			return this.getattr('sessid');
 		},
-		set: function(name, value) {
-			if (typeof name == 'object') {
+		get: function(name) {
+			return this.sessions().findWhere({name: name});
+		},
+		set: function(name, value, expires, path, domain, rebuilt) {
+			if (typeof name != 'string') {
 				return this.setattr.apply(this, arguments);
 			}
 
-			var data = this.getattr('data');
+			var data = {name: name, value: value, expires: expires, path: path, domain: domain, rebuilt: rebuilt},
+				session = this.sessions().findWhere(_.omit(data, 'rebuilt'));
 
-			data[name] = value;
-
-			return this;
-		},
-		get: function(name) {
-			var data = this.getattr('data');
-
-			return data[name];
-		},
-		data: function(data, full) {
-			if (data) {
-				if (full) {
-					this.setattr('data', data);
-				} else {
-					this.setattr('data', _.extend({}, this.getattr('data'), data));
-				}
-
-				return this;
+			if (!session) {
+				this.sessions().create(data);
 			}
 
-			return this.getattr('data');
+			return this;
 		},
 		http: function(http) {
 			if (http) {
@@ -64,17 +51,24 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 			return this.getattr('savepath') + path;
 		},
 		save: function() {
-			var list = _.pairs(this.data());
-
-			if (list.length > 0) {
+			if (this.sessions().length > 0) {
 				try {
-					fs.writeFileSync(this.path('%s.dat'.replace(/%s/, this.id())),  _.map(list, function(item) {
-						return _.template('<%=key%>=<%=value%>').call(this, {key: item[0], value: item[1]});
-					}).join(';'));
+					fs.writeFileSync(this.path('%s.dat'.replace(/%s/, this.id())), this.tokens());
 				} catch (error) { }
 			}
 
 			return this;
+		},
+        tokens: function(tokens, rebuilt) {
+			if (typeof tokens != 'undefined') {
+				if (tokens) {
+					this.sessions().parse(tokens, rebuilt);
+				}
+
+				return this;
+			}
+
+			return this.sessions().tokens();
 		},
 		destroy: function() {
 
@@ -88,14 +82,21 @@ define(['underscore', 'backbone', 'fs'], function (_, Backbone, fs) {
 		headers: function() {
 
 		},
+		sessions: function(sessions) {
+			if (sessions) {
+				this.setattr('sessions', sessions);
+
+				return this;
+			}
+
+			return this.getattr('sessions');
+		},
 		buildheaders: function() {
 
 		},
 		initializedata: function() {
 			try {
-				var data = fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.id()))).toString();
-
-				this.data(_.object(_.map(data.trim().split(';'), function(item) { return item.trim().split('='); })), true);
+				this.tokens(fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.id()))).toString(), true);
 			} catch (error) { }
 		}
     });

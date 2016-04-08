@@ -1,31 +1,25 @@
-define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone, Session) {
+define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/cookies'], function (_, Backbone, Session, Cookies) {
 	return Backbone.Model.extend({
         attributes: {
-			data: null,
 			http: null,
-			isnew: null,
-            tokens: null,
 			sessid: null,
-			newdata: null
+			cookies: null
         },
-        defaults: {
-            data: {},
-			isnew: false,
-            tokens: '',
-			newdata: []
-        },
+        defaults: function() {
+			return {
+				cookies: new Cookies()
+	        }
+		},
         initialize: function(http) {
 			this.http(http).tokens(http.request().headers.cookie || '', true).generate();
         },
-		id: function(id) {
+		id: function(id, rebuilt) {
 			if (id) {
-				this.setattr('sessid', id);
+				var session = new Session();
 
-				if (this.isnew()) {
-					this.set(this.cookieid(), id);
-				}
+				session.http(this.http()).id(id); this.http().session(session);
 
-				this.http().session(new Session(this.http(), id));
+				this.set(this.cookieid(), id, false, '/', false, rebuilt).setattr('sessid', id);
 
 				return this;
 			}
@@ -33,39 +27,21 @@ define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone,
 			return this.getattr('sessid');
 		},
 		get: function(name) {
-			var data = this.data();
-
-			return data[name];
+			return this.cookies().findWhere({name: name});
 		},
-		set: function(name, value, expires, path, domain) {
-			if (typeof name == 'object') {
+		set: function(name, value, expires, path, domain, rebuilt) {
+			if (typeof name != 'string') {
 				return this.setattr.apply(this, arguments);
 			}
 
-			var data = this.data();
+			var data = {name: name, value: value, expires: expires, path: path, domain: domain, rebuilt: rebuilt},
+				cookie = this.cookies().findWhere(_.omit(data, 'rebuilt'));
 
-			data[name] = value;
-
-			this.newdata([name]);
-
-			return this;
-		},
-        data: function(data, full) {
-			if (data) {
-				this.setattr('data', _.extend({}, this.getattr('data'), data));
-
-				if (full) {
-					this.setattr('data', data);
-				} else {
-					this.setattr('data', _.extend({}, this.getattr('data'), data));
-
-					this.newdata(_.keys(data));
-				}
-
-				return this;
+			if (!cookie) {
+				this.cookies().create(data);
 			}
 
-			return this.getattr('data');
+			return this;
 		},
 		http: function(http) {
 			if (http) {
@@ -76,27 +52,16 @@ define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone,
 
 			return this.getattr('http');
 		},
-		isnew: function(isnew) {
-			if (typeof isnew != 'undefined') {
-				this.setattr('isnew', isnew);
-
-				return this;
-			}
-
-			return this.getattr('isnew');
-		},
-        tokens: function(tokens, full) {
+        tokens: function(tokens, rebuilt) {
 			if (typeof tokens != 'undefined') {
 				if (tokens) {
-					this.setattr('tokens', tokens).data(_.object(_.map(tokens.trim().split(';'), function(tokens) { return tokens.trim().split('='); })), full);
+					this.cookies().parse(tokens, rebuilt);
 				}
 
 				return this;
 			}
 
-			return _.map(_.pairs(this.data()), function(item) {
-				return _.template('<%=key%>=<%=value%>;').call(this, {key: item[0], value: item[1]});
-			}).join('');
+			return this.cookies().tokens(rebuilt ? {rebuilt: false} : {});
 		},
 		setattr: function() {
 			return Backbone.Model.prototype.set.apply(this, arguments);
@@ -105,7 +70,7 @@ define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone,
 			return Backbone.Model.prototype.get.apply(this, arguments);
 		},
 		headers: function() {
-			var tokens = this.newtokens(),
+			var tokens = this.tokens(undefined, true),
 				headers = {};
 
 			if (tokens) {
@@ -114,37 +79,26 @@ define(['underscore', 'backbone', 'models/http/session'], function (_, Backbone,
 
 			return headers;
 		},
-		newdata: function(newdata) {
-			if (newdata) {
-				this.setattr('newdata', _.union(this.getattr('newdata'), newdata));
+		cookies: function(cookies) {
+			if (cookies) {
+				this.setattr('cookies', cookies);
 
 				return this;
 			}
 
-			return this.getattr('newdata');
+			return this.getattr('cookies');
 		},
 		generate: function() {
 			if (this.get(this.cookieid())) {
-				this.id(this.get(this.cookieid()));
+				this.id(this.get(this.cookieid()).value(), true);
 			} else {
-				this.isnew(true).id(Math.random().toString().substr(10));
+				this.id(Math.random().toString().substr(10));
 			}
 
 			return this;
 		},
 		cookieid: function() {
 			return this.http().cookieid();
-		},
-		newtokens: function() {
-			if (this.newdata()) {
-				var list = _.pairs(_.pick.apply(this, _.union([this.data(), this.newdata()])));
-
-				return _.map(list, function(item) {
-					return _.template('<%=key%>=<%=value%>').call(this, {key: item[0], value: item[1]});
-				}).join(';');
-			}
-
-			return '';
 		},
 		buildheaders: function() {
 			this.http().headers(this.headers());
