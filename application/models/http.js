@@ -41,7 +41,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			if (this.status() == 200) {
 				this.response().write(this.content());
 			} else {
-				this.response().write(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.status()))));
+				this.response().write(fs.readFileSync(this.path('404.html'.replace(/%s/, this.status()))));
 			}
 
 			this.response().end();
@@ -72,7 +72,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			return this;
         },
 		reset: function() {
-			this.set({content: '', headers: this.defaults.headers, request: null, response: null});
+			this.set({content: '', status: this.defaults.status, headers: this.defaults.headers, request: null, response: null});
 
 			return this;
 		},

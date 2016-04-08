@@ -7,8 +7,6 @@ define(['backbone'], function (Backbone) {
 			require(['views/common'], function (Common) {
 				new Common();
 			});
-
-			this.chess();
 		},
 		chess: function() {
 			require(['models/chess', 'models/transport/websocket', 'views/chess'], function (Chess, Transport, View) {

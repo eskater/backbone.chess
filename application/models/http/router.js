@@ -37,7 +37,7 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 			var http = this.http(),
 				request = http.request();
 
-            var rules = this.get('rules'),
+            var rules = this.rules(),
 				content = null;
 
 			var urlpath = url.parse(request.url),
@@ -92,6 +92,8 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 					try {
 						http.header('Content-Type', mime.lookup(http.path(request.url))).content(fs.readFileSync(http.path(request.url))).end();
 	                } catch (error) {
+						http.header('Content-Type', 'text/html');
+
 	                    http.status(404).end();
 	                }
 				}

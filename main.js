@@ -29,19 +29,9 @@ requirejs.config({
 
 requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
     application.http().root('./client/').cookieid('_chess_id').router().push({
-        url: '^/chess/$',
+        url: '^/auth/$',
         get: function(http) {
-            return template.scheme('chess').styles([{path: '/css/normalize.css',}, {path: '/css/chess.css',}]).script({
-                path: '/js/vendor/require.js',
-                attributes: {
-                    'data-main': '/js/main'
-                }
-            }).title('Chess online').render();
-        }
-    }).push({
-        url: '^/hello/(name:\\w{4,})/(id:\\d+)/$',
-        get: function(http) {
-            return template.scheme('hello').title('hello username').render(http);
+            return template.scheme('auth').title('authentication').render(http);
         }
     });
 
