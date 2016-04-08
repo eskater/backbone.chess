@@ -4,6 +4,7 @@ define(['underscore', 'backbone'], function (_, Backbone) {
             path: null,
             name: null,
             value: null,
+			secure: null,
             domain: null,
             expires: null,
             rebuilt: null
@@ -72,6 +73,15 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 
                 return false;
             })).join(';');
+        },
+        secure: function(secure) {
+            if (typeof secure != 'undefined') {
+                this.set('secure', secure);
+
+                return this;
+            }
+
+            return this.get('secure');
         },
         domain: function(domain) {
             if (typeof domain != 'undefined') {

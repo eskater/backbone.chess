@@ -19,7 +19,7 @@ define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/
 
 				session.http(this.http()).id(id); this.http().session(session);
 
-				this.set(this.cookieid(), id, false, '/', false, rebuilt).setattr('sessid', id);
+				this.set(this.cookieid(), id, undefined, '/', undefined, undefined, rebuilt).setattr('sessid', id);
 
 				return this;
 			}
@@ -29,12 +29,12 @@ define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/
 		get: function(name) {
 			return this.cookies().findWhere({name: name});
 		},
-		set: function(name, value, expires, path, domain, rebuilt) {
+		set: function(name, value, expires, path, domain, secure, rebuilt) {
 			if (typeof name != 'string') {
 				return this.setattr.apply(this, arguments);
 			}
 
-			var data = {name: name, value: value, expires: expires, path: path, domain: domain, rebuilt: rebuilt},
+			var data = this._compact({name: name, value: value, expires: expires, path: path, domain: domain, secure: secure, rebuilt: rebuilt}),
 				cookie = this.cookies().findWhere(_.omit(data, 'rebuilt'));
 
 			if (!cookie) {
@@ -102,6 +102,17 @@ define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/
 		},
 		buildheaders: function() {
 			this.http().headers(this.headers());
+		},
+		_compact: function(object) {
+			var data = {};
+
+			for (var i in object) {
+				if (typeof object != 'undefined') {
+					data[i] = object[i];
+				}
+			}
+
+			return data;
 		}
     });
 });

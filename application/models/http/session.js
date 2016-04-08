@@ -24,12 +24,12 @@ define(['underscore', 'backbone', 'collections/http/item/sessions', 'fs'], funct
 		get: function(name) {
 			return this.sessions().findWhere({name: name});
 		},
-		set: function(name, value, expires, path, domain, rebuilt) {
+		set: function(name, value, expires, path, domain, secure, rebuilt) {
 			if (typeof name != 'string') {
 				return this.setattr.apply(this, arguments);
 			}
 
-			var data = {name: name, value: value, expires: expires, path: path, domain: domain, rebuilt: rebuilt},
+			var data = this._compact({name: name, value: value, expires: expires, path: path, domain: domain, secure: secure, rebuilt: rebuilt}),
 				session = this.sessions().findWhere(_.omit(data, 'rebuilt'));
 
 			if (!session) {
@@ -98,6 +98,17 @@ define(['underscore', 'backbone', 'collections/http/item/sessions', 'fs'], funct
 			try {
 				this.tokens(fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.id()))).toString(), true);
 			} catch (error) { }
+		},
+		_compact: function(object) {
+			var data = {};
+
+			for (var i in object) {
+				if (typeof object[i] != 'undefined') {
+					data[i] = object[i];
+				}
+			}
+
+			return data;
 		}
     });
 });
