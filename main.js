@@ -32,6 +32,9 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
         url: '^/auth/$',
         get: function(http) {
             return template.scheme('auth').title('authentication').render(http);
+        },
+        post: function() {
+            return this.get.apply(this, arguments);
         }
     });
 

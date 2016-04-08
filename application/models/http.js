@@ -72,7 +72,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 			return this;
         },
 		reset: function() {
-			this.set({content: '', status: this.defaults.status, headers: this.defaults.headers, request: null, response: null});
+			this.set(_.omit(this.defaults, 'root', 'index', 'address', 'cookieid'));
 
 			return this;
 		},
@@ -212,7 +212,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 		},
 		posts: function(posts) {
 			if (posts) {
-				this.setattr('post', _.extends({}, this.getattr('post'), posts));
+				this.setattr('post', _.extend({}, this.getattr('post'), posts));
 
 				return this;
 			}
