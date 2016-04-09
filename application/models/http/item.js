@@ -1,5 +1,5 @@
-define(['underscore', 'backbone'], function (_, Backbone) {
-	return Backbone.Model.extend({
+define(['underscore', 'models/model'], function (_, Model) {
+	return Model.extend({
 		attributes: {
             path: null,
             name: null,
@@ -110,8 +110,8 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 
             return this.get('rebuilt');
         },
-        sync: function() {
-            return false;
-        }
+		sync: function() {
+			return false;
+		}
     });
 });

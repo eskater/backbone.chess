@@ -1,19 +1,48 @@
 <div class="row">
-    <div class="col-xs-12 col-sm-8">
-        <form name="login-form" method="POST" class="form-horizontal">
+    <div class="col-xs-12 col-sm-12 col-md-6">
+        <div class="col-sm-12">
+            <h2>Sing in</h2>
+        </div>
+        <form name="singin-form" action="/auth/singin/" method="POST" class="form-horizontal">
             <div class="form-group">
                 <label for="email" class="col-xs-12 col-sm-4">Email:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="email" type="email" class="form-control" name="email" value="<%=data.post('email')%>" required/>
+                    <input id="email" type="email" class="form-control" name="singin-email" value="<%=data.param('singin-email')%>" required/>
                 </div>
             </div>
             <div class="form-group">
                 <label for="password" class="col-xs-12 col-sm-4">Password:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="password" type="password" class="form-control" name="password" required/>
+                    <input id="password" type="password" class="form-control" name="singin-password" required/>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Enter</button>
+            <button type="submit" class="btn btn-primary">Sing in</button>
+        </form>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-6">
+        <div class="col-sm-12">
+            <h2>Sing up</h2>
+        </div>
+        <form name="singup-form" action="/auth/singup/" method="POST" class="form-horizontal">
+            <div class="form-group">
+                <label for="email" class="col-xs-12 col-sm-4">Email:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="email" type="email" class="form-control" name="singup-email" value="<%=data.param('singup-email')%>" required/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password" class="col-xs-12 col-sm-4">Password:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="password" type="password" class="form-control" name="singup-password" required/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password" class="col-xs-12 col-sm-4">Confirm Password:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="confirm-password" type="password" class="form-control" name="singup-password" required/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Sing up</button>
         </form>
     </div>
 </div>

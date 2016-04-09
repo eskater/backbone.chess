@@ -1,5 +1,5 @@
-define(['backbone'], function (Backbone) {
-	return Backbone.Model.extend({
+define(['models/model'], function (Model) {
+	return Model.extend({
 		attributes: {
             name: null,
             walk: null,
@@ -21,6 +21,9 @@ define(['backbone'], function (Backbone) {
         },
         color: function() {
             return this.get('color');
-        }
+        },
+		sync: function() {
+			return false;
+		}
     });
 });

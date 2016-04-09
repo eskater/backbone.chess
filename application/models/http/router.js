@@ -1,11 +1,13 @@
-define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function (querystring, _, Backbone, fs, url, mime) {
-	return Backbone.Model.extend({
+define(['querystring', 'underscore', 'models/model', 'fs', 'url', 'mime', 'collections/http/router/rules'], function (querystring, _, Model, fs, url, mime, Rules) {
+	return Model.extend({
         attributes: {
 			http: null,
             rules: null
         },
-        defaults: {
-            rules: []
+        defaults: function() {
+            return {
+				rules: new Rules()
+			}
         },
         initialize: function(http) {
 			this.http(http);
@@ -20,7 +22,7 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 			return this.get('http');
 		},
         push: function(rule) {
-            this.rules().push(rule);
+            this.rules().create(rule);
 
 			return this;
         },
@@ -33,27 +35,25 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 
 			return this.get('rules');
 		},
-        handle: function() {
+        handle: function(params, method) {
 			var http = this.http(),
 				request = http.request();
-
-            var rules = this.rules(),
-				content = null;
 
 			var urlpath = url.parse(request.url),
 				databuffer = '';
 
-			var method = request.method.toLowerCase();
+			var method = method || request.method.toLowerCase(),
+				content = null;
 
 			http.header('Content-Type', 'text/html');
 
-            for (var i in rules) {
-				var urltokens = rules[i].url.replace(/\(\w+\:(.+?)\)/g, '($1)'),
-					urlmatches = rules[i].url.match(/(?!=\()(\w+)(?=\:.+?\))/g);
+			_.each(this.rules().where(params), function(rule) {
+				var urltokens = rule.url().replace(/\(\w+\:(.+?)\)/g, '($1)'),
+					urlmatches = rule.url().match(/(?!=\()(\w+)(?=\:.+?\))/g);
 
-				var urlvalues = [];
+				var urlvalues = urlpath.pathname.match(new RegExp(urltokens));
 
-				if ((urlvalues = urlpath.pathname.match(new RegExp(urltokens)))) {
+				if (params || urlvalues) {
 					if (urlmatches) {
 						urlvalues = urlvalues.slice(1, urlmatches.length + 1);
 
@@ -66,17 +66,19 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 						http.gets(_.extend({}, http.gets(), _.object(_.map(urlpath.query.split('&'), function(tokens) { return tokens.split('='); }))));
 					}
 
-					if (!(content = rules[i][method]) && rules[i]['all']) {
-						content = rules[i]['all'];
+					http.params(http.gets());
+
+					if (!(content = rule.get(method)) && rule.get('all')) {
+						content = rule.get('all');
 					}
-                }
-            }
+				}
+			});
 
 			var end = (function() {
 				if (content) {
 					switch (typeof content) {
 						case 'function':
-							var result = content.call(rules[i], http, (function(content) {
+							var result = content.call(this, http, (function(content) {
 								http.content(content).end();
 							}).bind(this));
 
@@ -108,6 +110,7 @@ define(['querystring', 'underscore', 'backbone', 'fs', 'url', 'mime'], function 
 
 				request.on('end', (function() {
 					http.posts(querystring.parse(databuffer));
+					http.params(http.posts());
 
 					end.call(this);
 				}).bind(this));

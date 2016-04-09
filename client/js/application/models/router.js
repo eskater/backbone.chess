@@ -1,5 +1,5 @@
-define(['backbone'], function (Backbone) {
-	return Backbone.Model.extend({
+define(['models/model'], function (Model) {
+	return Model.extend({
 		constructor: function () {
 			jQuery(window).on('hashchange', (function() {
 				this.hashchange();

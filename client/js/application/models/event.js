@@ -1,5 +1,5 @@
-define(['backbone'], function (Backbone) {
-	return Backbone.Model.extend({
+define(['models/model'], function (Model) {
+	return Model.extend({
 		attributes: {
             name: null,
             board: null,
@@ -11,7 +11,7 @@ define(['backbone'], function (Backbone) {
                 case 'handler':
                     return this.attributes[attribute].apply(this, [this, this.get('events')]);
                 default:
-                    return Backbone.Model.prototype.get.call(this, attribute);
+                    return Model.prototype.get.call(this, attribute);
             }
         },
         sync: function() {

@@ -1,7 +1,8 @@
-define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, fs, application) {
+define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
     if (!GLOBAL._template) {
-        var Template = Backbone.Model.extend({
+        var Template = Model.extend({
     		attributes: {
+                path: null,
                 mets: null,
                 title: null,
                 scheme: null,
@@ -12,6 +13,7 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
                 components: null
             },
             defaults: {
+                path: './application/templates/',
                 mets: [],
                 title: 'Page',
                 scheme: 'index',
@@ -24,23 +26,8 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
             initialize: function(template) {
                 this.template(template);
             },
-            title: function(title) {
-                if (title) {
-                    this.set('title', title);
-
-                    return this;
-                }
-
-                return this.get('title');
-            },
-            scheme: function(scheme) {
-                if (scheme) {
-                    this.set('scheme', scheme);
-
-                    return this;
-                }
-
-                return this.get('scheme');
+            path: function(path) {
+                return this.get('path') + path;
             },
             meta: function(meta) {
                 this.mets().push(meta);
@@ -61,6 +48,24 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
 
 
                 return this;
+            },
+            title: function(title) {
+                if (title) {
+                    this.set('title', title);
+
+                    return this;
+                }
+
+                return this.get('title');
+            },
+            scheme: function(scheme) {
+                if (scheme) {
+                    this.set('scheme', scheme);
+
+                    return this;
+                }
+
+                return this.get('scheme');
             },
             styles: function(styles) {
                 if (styles) {
@@ -95,7 +100,7 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
                 return this.get('content');
             },
             include: function(scheme, params) {
-                return _.template(fs.readFileSync(application.path('application/templates/%s.html'.replace(/%s/, scheme))).toString()).call(this, {template: this, data: params})
+                return _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, scheme))).toString()).call(this, {template: this, data: params})
             },
             template: function(template) {
                 if (template) {
@@ -149,10 +154,10 @@ define(['underscore', 'backbone', 'fs', 'application'], function (_, Backbone, f
             },
             render: function(params) {
                 if (this.scheme()) {
-                    this.content(_.template(fs.readFileSync(application.path('application/templates/%s.html'.replace(/%s/, this.scheme()))).toString()).call(this, {template: this, data: params}));
+                    this.content(_.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.scheme()))).toString()).call(this, {template: this, data: params}));
                 }
 
-                var result = _.template(fs.readFileSync(application.path('application/templates/%s.html'.replace(/%s/, this.template()))).toString()).call(this, {template: this});
+                var result = _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.template()))).toString()).call(this, {template: this});
 
                 this.reset();
 

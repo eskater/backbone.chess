@@ -1,5 +1,5 @@
-define(['backbone'], function (Backbone) {
-	return Backbone.Model.extend({
+define(['models/model'], function (Model) {
+	return Model.extend({
 		attributes: {
             id: null,
             login: null,
@@ -9,7 +9,7 @@ define(['backbone'], function (Backbone) {
 
         },
         initialize: function() {
-            
+
         }
     });
 });

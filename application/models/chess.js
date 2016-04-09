@@ -1,5 +1,5 @@
-define(['backbone', 'models/fen', 'models/game/blitz', 'collections/board', 'collections/events', 'collections/players'], function (Backbone, Fen, Blitz, Board, Events, Players) {
-	return Backbone.Model.extend({
+define(['models/model', 'models/fen', 'models/game/blitz', 'collections/board', 'collections/events', 'collections/players'], function (Model, Fen, Blitz, Board, Events, Players) {
+	return Model.extend({
 		attributes: {
             fen: null,
             pat: null,

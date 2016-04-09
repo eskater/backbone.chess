@@ -1,5 +1,5 @@
-define(['backbone', 'models/figure/behavior/bishop', 'models/figure/behavior/king', 'models/figure/behavior/knight', 'models/figure/behavior/pawn', 'models/figure/behavior/queen', 'models/figure/behavior/rook'], function (Backbone, Bishop, King, Knight, Pawn, Queen, Rook) {
-	return Backbone.Model.extend({
+define(['models/model', 'models/figure/behavior/bishop', 'models/figure/behavior/king', 'models/figure/behavior/knight', 'models/figure/behavior/pawn', 'models/figure/behavior/queen', 'models/figure/behavior/rook'], function (Model, Bishop, King, Knight, Pawn, Queen, Rook) {
+	return Model.extend({
 		attributes: {
             row: null,
             col: null,

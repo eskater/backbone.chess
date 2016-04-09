@@ -1,5 +1,5 @@
-define(['backbone', 'ws'], function (Backbone, ws) {
-	return Backbone.Model.extend({
+define(['models/model', 'ws'], function (Model, ws) {
+	return Model.extend({
 		attributes: {
 			port: null,
 			events: null,

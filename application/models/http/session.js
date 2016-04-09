@@ -1,5 +1,5 @@
-define(['underscore', 'backbone', 'collections/http/item/sessions', 'fs'], function (_, Backbone, Sessions, fs) {
-	return Backbone.Model.extend({
+define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], function (_, Model, Sessions, fs) {
+	return Model.extend({
         attributes: {
             http: null,
 			sessid: null,
@@ -74,10 +74,10 @@ define(['underscore', 'backbone', 'collections/http/item/sessions', 'fs'], funct
 
 		},
 		setattr: function() {
-			return Backbone.Model.prototype.set.apply(this, arguments);
+			return Model.prototype.set.apply(this, arguments);
 		},
 		getattr: function() {
-			return Backbone.Model.prototype.get.apply(this, arguments);
+			return Model.prototype.get.apply(this, arguments);
 		},
 		headers: function() {
 

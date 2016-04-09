@@ -1,12 +1,13 @@
 /** Mini bad implementation http server */
-define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/http/cookie'], function (_, Backbone, http, fs, Router, Cookie) {
-	return Backbone.Model.extend({
+define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'models/http/cookie'], function (_, Model, http, fs, Router, Cookie) {
+	return Model.extend({
         attributes: {
 			get: null,
 			post: null,
             port: null,
             root: null,
             index: null,
+			params: null,
 			status: null,
             router: null,
 			cookie: null,
@@ -23,6 +24,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
             port: 80,
 			root: 'client/',
             index: 'index.html',
+			params: {},
 			status: 200,
 			content: '',
 			headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
@@ -46,7 +48,7 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			this.response().end();
 			this.session().save();
-			this.reset();
+			// this.reset();
 		},
 		root: function(root) {
             if (root) {
@@ -120,10 +122,20 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
             return headers[name];
 		},
 		setattr: function() {
-			return Backbone.Model.prototype.set.apply(this, arguments);
+			return Model.prototype.set.apply(this, arguments);
 		},
 		getattr: function() {
-			return Backbone.Model.prototype.get.apply(this, arguments);
+			return Model.prototype.get.apply(this, arguments);
+		},
+		forward: function(name, method) {
+			var rule = this.router().rules().findWhere({name: name}),
+				method = method || 'get';
+
+			if (rule && rule.get(method)) {
+				return rule.get(method).call(this, this);
+			}
+
+			return false;
 		},
         headers: function(headers) {
 			if (headers) {
@@ -219,5 +231,25 @@ define(['underscore', 'backbone', 'http', 'fs', 'models/http/router', 'models/ht
 
 			return this.getattr('post');
 		},
+		param: function(name) {
+			var params = this.params();
+
+			if (typeof value != 'undefined') {
+				params[name] = value;
+
+				return this;
+			}
+
+			return params[name];
+		},
+		params: function(params) {
+			if (params) {
+				this.setattr('params', _.extend({}, this.getattr('params'), params));
+
+				return this;
+			}
+
+			return this.getattr('params');
+		}
     });
 });

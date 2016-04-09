@@ -1,5 +1,5 @@
-define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/cookies'], function (_, Backbone, Session, Cookies) {
-	return Backbone.Model.extend({
+define(['underscore', 'models/model', 'models/http/session', 'collections/http/item/cookies'], function (_, Model, Session, Cookies) {
+	return Model.extend({
         attributes: {
 			http: null,
 			sessid: null,
@@ -64,10 +64,10 @@ define(['underscore', 'backbone', 'models/http/session', 'collections/http/item/
 			return this.cookies().tokens(rebuilt ? {rebuilt: false} : {});
 		},
 		setattr: function() {
-			return Backbone.Model.prototype.set.apply(this, arguments);
+			return Model.prototype.set.apply(this, arguments);
 		},
 		getattr: function() {
-			return Backbone.Model.prototype.get.apply(this, arguments);
+			return Model.prototype.get.apply(this, arguments);
 		},
 		headers: function() {
 			var tokens = this.tokens(undefined, true),

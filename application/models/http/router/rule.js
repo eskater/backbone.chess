@@ -1,9 +1,13 @@
-define(['underscore', 'backbone'], function (_, Backbone) {
-	return Backbone.Model.extend({
+define(['models/model'], function (Model) {
+	return Model.extend({
 		attributes: {
             url: null,
+			all: null,
+			get: null,
+			post: null,
+			name: null
         },
-        url: function(url) {
+		url: function(url) {
             if (typeof url != 'undefined') {
                 this.set('url', url);
 
@@ -12,8 +16,17 @@ define(['underscore', 'backbone'], function (_, Backbone) {
 
             return this.get('url');
         },
-        sync: function() {
-            return false;
-        }
+		name: function(name) {
+            if (typeof name != 'undefined') {
+                this.set('name', name);
+
+                return this;
+            }
+
+            return this.get('name');
+        },
+		sync: function() {
+			return false;
+		}
     });
 });

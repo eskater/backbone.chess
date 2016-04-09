@@ -30,11 +30,19 @@ requirejs.config({
 requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
     application.http().root('./client/').cookieid('_chess_id').router().push({
         url: '^/auth/$',
+        name: 'auth',
         get: function(http) {
             return template.scheme('auth').title('authentication').render(http);
-        },
-        post: function() {
-            return this.get.apply(this, arguments);
+        }
+    }).push({
+        url: '^/auth/singin/$',
+        post: function(http) {
+            return http.forward('auth', 'get');
+        }
+    }).push({
+        url: '^/auth/singup/$',
+        post: function(http) {
+            return http.forward('auth', 'get');
         }
     });
 
