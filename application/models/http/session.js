@@ -1,5 +1,6 @@
 define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], function (_, Model, Sessions, fs) {
 	return Model.extend({
+		idAttribute: 'sessid',
         attributes: {
             http: null,
 			sessid: null,
@@ -11,15 +12,6 @@ define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], f
 				savepath: './sessions/',
 				sessions: new Sessions()
 	        }
-		},
-		id: function(id) {
-			if (id) {
-				this.setattr('sessid', id).initializedata();
-
-				return this;
-			}
-
-			return this.getattr('sessid');
 		},
 		get: function(name) {
 			return this.sessions().findWhere({name: name});
@@ -53,11 +45,20 @@ define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], f
 		save: function() {
 			if (this.sessions().length > 0) {
 				try {
-					fs.writeFileSync(this.path('%s.dat'.replace(/%s/, this.id())), this.tokens());
+					fs.writeFileSync(this.path('%s.dat'.replace(/%s/, this.sessid())), this.tokens());
 				} catch (error) { }
 			}
 
 			return this;
+		},
+		sessid: function(sessid) {
+			if (sessid) {
+				this.setattr('sessid', sessid).initializedata();
+
+				return this;
+			}
+
+			return this.getattr('sessid');
 		},
         tokens: function(tokens, rebuilt) {
 			if (typeof tokens != 'undefined') {
@@ -96,8 +97,11 @@ define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], f
 		},
 		initializedata: function() {
 			try {
-				this.tokens(fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.id()))).toString(), true);
+				this.tokens(fs.readFileSync(this.path('%s.dat'.replace(/%s/, this.sessid()))).toString(), true);
 			} catch (error) { }
+		},
+		sync: function() {
+			return false;
 		},
 		_compact: function(object) {
 			var data = {};

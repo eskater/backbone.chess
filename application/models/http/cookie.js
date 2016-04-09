@@ -1,5 +1,6 @@
 define(['underscore', 'models/model', 'models/http/session', 'collections/http/item/cookies'], function (_, Model, Session, Cookies) {
 	return Model.extend({
+		idAttribute: 'sessid',
         attributes: {
 			http: null,
 			sessid: null,
@@ -13,19 +14,6 @@ define(['underscore', 'models/model', 'models/http/session', 'collections/http/i
         initialize: function(http) {
 			this.http(http).tokens(http.request().headers.cookie || '', true).generate();
         },
-		id: function(id, rebuilt) {
-			if (id) {
-				var session = new Session();
-
-				session.http(this.http()).id(id); this.http().session(session);
-
-				this.set(this.cookieid(), id, undefined, '/', undefined, undefined, rebuilt).setattr('sessid', id);
-
-				return this;
-			}
-
-			return this.getattr('sessid');
-		},
 		get: function(name) {
 			return this.cookies().findWhere({name: name});
 		},
@@ -51,6 +39,19 @@ define(['underscore', 'models/model', 'models/http/session', 'collections/http/i
 			}
 
 			return this.getattr('http');
+		},
+		sessid: function(sessid, rebuilt) {
+			if (sessid) {
+				var session = new Session();
+
+				session.http(this.http()).sessid(sessid); this.http().session(session);
+
+				this.set(this.cookieid(), sessid, undefined, '/', undefined, undefined, rebuilt).setattr('sessid', sessid);
+
+				return this;
+			}
+
+			return this.getattr('sessid');
 		},
         tokens: function(tokens, rebuilt) {
 			if (typeof tokens != 'undefined') {
@@ -90,9 +91,9 @@ define(['underscore', 'models/model', 'models/http/session', 'collections/http/i
 		},
 		generate: function() {
 			if (this.get(this.cookieid())) {
-				this.id(this.get(this.cookieid()).value(), true);
+				this.sessid(this.get(this.cookieid()).value(), true);
 			} else {
-				this.id(Math.random().toString().substr(10));
+				this.sessid(Math.random().toString().substr(10));
 			}
 
 			return this;
@@ -102,6 +103,9 @@ define(['underscore', 'models/model', 'models/http/session', 'collections/http/i
 		},
 		buildheaders: function() {
 			this.http().headers(this.headers());
+		},
+		sync: function() {
+			return false;
 		},
 		_compact: function(object) {
 			var data = {};

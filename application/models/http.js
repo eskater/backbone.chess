@@ -1,4 +1,4 @@
-/** Mini bad implementation http server */
+/** Mini implementation simple http server */
 define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'models/http/cookie'], function (_, Model, http, fs, Router, Cookie) {
 	return Model.extend({
         attributes: {
@@ -43,12 +43,16 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 			if (this.status() == 200) {
 				this.response().write(this.content());
 			} else {
-				this.response().write(fs.readFileSync(this.path('404.html'.replace(/%s/, this.status()))));
+				try {
+					this.response().write(fs.readFileSync(this.path('404.html'.replace(/%s/, this.status()))));
+				} catch(error) {
+					this.response().write('');
+				}
 			}
 
 			this.response().end();
 			this.session().save();
-			// this.reset();
+			this.reset();
 		},
 		root: function(root) {
             if (root) {
@@ -132,10 +136,12 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 				method = method || 'get';
 
 			if (rule && rule.get(method)) {
-				return rule.get(method).call(this, this);
-			}
+				var content = rule.get(method).call(this, this);
 
-			return false;
+				if (content) {
+					this.content(content).end();
+				}
+			}
 		},
         headers: function(headers) {
 			if (headers) {
@@ -172,6 +178,9 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
             }
 
             return this.getattr('request');
+		},
+		redirect: function(url) {
+			this.header('Location', url).status(301).end();
 		},
 		response: function(response) {
 			if (response) {
