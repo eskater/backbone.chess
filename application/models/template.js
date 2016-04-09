@@ -1,4 +1,4 @@
-define(['underscore', 'models/model', 'fs', 'models/utils'], function (_, Model, fs, utils) {
+define(['underscore', 'models/model', 'fs', 'models/utils', 'application'], function (_, Model, fs, utils, application) {
     if (!GLOBAL._template) {
         var Template = Model.extend({
     		attributes: {
@@ -122,8 +122,8 @@ define(['underscore', 'models/model', 'fs', 'models/utils'], function (_, Model,
 
                 return this.get('content');
             },
-            include: function(scheme, params) {
-                return _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, scheme))).toString()).call(this, {template: this, data: params})
+            include: function(scheme, data) {
+                return _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, scheme))).toString()).call(this, this.dataintemplate({data: data}))
             },
             template: function(template) {
                 if (template) {
@@ -175,16 +175,19 @@ define(['underscore', 'models/model', 'fs', 'models/utils'], function (_, Model,
 
                 return scripts;
             },
-            render: function(params) {
+            render: function(data) {
                 if (this.scheme()) {
-                    this.content(_.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.scheme()))).toString()).call(this, {template: this, data: params}));
+                    this.content(_.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.scheme()))).toString()).call(this, this.dataintemplate({data: data})));
                 }
 
-                var result = _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.template()))).toString()).call(this, {template: this});
+                var result = _.template(fs.readFileSync(this.path('%s.html'.replace(/%s/, this.template()))).toString()).call(this, this.dataintemplate({data: data}));
 
                 this.reset();
 
                 return result;
+            },
+            dataintemplate: function (data) {
+                return _.extend({}, {template: this, http: application.http(), application: application}, data);
             }
         });
 

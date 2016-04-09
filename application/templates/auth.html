@@ -1,13 +1,13 @@
 <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-6">
         <div class="col-sm-12">
-            <h3>Sing in</h3>
+            <h3><%=application.gettext('template-auth-singin-title')%></h3>
         </div>
         <form name="singin-form" action="/auth/singin/" method="POST" class="form-horizontal">
             <div class="form-group">
                 <label for="email" class="col-xs-12 col-sm-4">Email:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="email" type="email" class="form-control" name="singin-email" value="<%=data.param('singin-email')%>" required/>
+                    <input id="email" type="email" class="form-control" name="singin-email" value="<%=http.param('singin-email')%>" required/>
                 </div>
             </div>
             <div class="form-group">
@@ -21,13 +21,13 @@
     </div>
     <div class="col-xs-12 col-sm-12 col-md-6">
         <div class="col-sm-12">
-            <h3>Sing up</h3>
+            <h3><%=application.gettext('template-auth-singup-title')%></h3>
         </div>
         <form name="singup-form" action="/auth/singup/" method="POST" class="form-horizontal">
             <div class="form-group">
                 <label for="email" class="col-xs-12 col-sm-4">Email:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="email" type="email" class="form-control" name="singup-email" value="<%=data.param('singup-email')%>" required/>
+                    <input id="email" type="email" class="form-control" name="singup-email" value="<%=http.param('singup-email')%>" required/>
                 </div>
             </div>
             <div class="form-group">

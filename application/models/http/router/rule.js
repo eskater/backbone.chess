@@ -5,7 +5,8 @@ define(['models/model'], function (Model) {
 			all: null,
 			get: null,
 			post: null,
-			name: null
+			name: null,
+			solid: null,
         },
 		url: function(url) {
             if (typeof url != 'undefined') {
@@ -25,6 +26,15 @@ define(['models/model'], function (Model) {
 
             return this.get('name');
         },
+		solid: function(solid) {
+			if (typeof solid != 'undefined') {
+				this.set('solid', solid);
+
+				return this;
+			}
+
+			return this.get('solid');
+		},
 		sync: function() {
 			return false;
 		}

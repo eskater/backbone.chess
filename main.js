@@ -29,13 +29,21 @@ requirejs.config({
 
 requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
     application.http().root('./client/').cookieid('_chess_id').router().push({
-        url: '^/auth/$',
-        name: 'auth',
+        url: '^/(language:\\w+)/?',
+        solid: true,
         get: function(http) {
-            return template.scheme('auth').title('authentication').render(http);
+            if (['en', 'ru'].indexOf(http.get('language')) > -1) {
+                application.language(http.get('language'));
+            }
         }
     }).push({
-        url: '^/auth/singin/$',
+        url: '^/\\w+/auth/$',
+        name: 'auth',
+        get: function(http) {
+            return template.scheme('auth').title(application.gettext('template-auth-title')).render();
+        }
+    }).push({
+        url: '^/\\w+/auth/singin/?$',
         post: function(http) {
             template.flash('danger', 'User not found');
             template.flash('danger', 'Yes! User not found');
@@ -43,12 +51,12 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
             http.forward('auth');
         }
     }).push({
-        url: '^/auth/singup/$',
+        url: '^/\\w+/auth/singup/?$',
         post: function(http) {
             http.forward('auth');
         }
     }).push({
-        url: '^/redirect/$',
+        url: '^/\\w+/redirect/?$',
         get: function(http) {
             http.redirect('/auth/');
         }

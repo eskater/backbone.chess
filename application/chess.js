@@ -7,7 +7,7 @@ define(['underscore', 'models/model', 'locale', 'models/http'], function (_, Mod
 			},
 			defaults: {
 				root: './',
-				language: 'en'
+				language: 'ru'
 			},
 			initialize: function() {
 				this.set('http', new Http());
@@ -42,6 +42,15 @@ define(['underscore', 'models/model', 'locale', 'models/http'], function (_, Mod
 				} catch(error) {
 					return text;
 				}
+			},
+			language: function(language) {
+				if (language) {
+					this.set('language', language);
+
+					return this;
+				}
+
+				return this.get('language');
 			}
 		});
 
