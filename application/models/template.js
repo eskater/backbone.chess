@@ -1,10 +1,11 @@
-define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
+define(['underscore', 'models/model', 'fs', 'models/utils'], function (_, Model, fs, utils) {
     if (!GLOBAL._template) {
         var Template = Model.extend({
     		attributes: {
                 path: null,
                 mets: null,
                 title: null,
+                flash: null,
                 scheme: null,
                 styles: null,
                 content: null,
@@ -12,16 +13,19 @@ define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
                 template: null,
                 components: null
             },
-            defaults: {
-                path: './application/templates/',
-                mets: [],
-                title: 'Page',
-                scheme: 'index',
-                styles: [],
-                content: '',
-                scripts: [],
-                template: 'template',
-                components: {}
+            defaults: function() {
+                return {
+                    path: './application/templates/',
+                    mets: [],
+                    title: 'Page',
+                    flash: {},
+                    scheme: 'index',
+                    styles: [],
+                    content: '',
+                    scripts: [],
+                    template: 'template',
+                    components: {}
+                }
             },
             initialize: function(template) {
                 this.template(template);
@@ -46,7 +50,6 @@ define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
             style: function(style) {
                 this.styles().push(style);
 
-
                 return this;
             },
             title: function(title) {
@@ -57,6 +60,26 @@ define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
                 }
 
                 return this.get('title');
+            },
+            flash: function(type, value) {
+                var flash = this.get('flash');
+
+                if (value) {
+                    if (typeof flash[type] == 'undefined') {
+                        flash[type] = [];
+                    }
+
+                    flash[type].push(value);
+
+                    return this;
+                }
+
+                return type ? flash[type] : utils.compact(flash);
+            },
+            reset: function() {
+                this.set(_.omit(this.defaults(), 'path', 'template', 'components'));
+
+    			return this;
             },
             scheme: function(scheme) {
                 if (scheme) {
@@ -162,18 +185,6 @@ define(['underscore', 'models/model', 'fs'], function (_, Model, fs) {
                 this.reset();
 
                 return result;
-            },
-            reset: function() {
-                this.set({
-                    mets: [],
-                    title: 'Page',
-                    scheme: 'index',
-                    styles: [],
-                    content: '',
-                    scripts: [],
-                });
-
-                return this;
             }
         });
 

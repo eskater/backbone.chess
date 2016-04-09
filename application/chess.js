@@ -1,6 +1,6 @@
-define(['backbone', 'locale', 'models/http'], function (Backbone, LOCALE, Http) {
+define(['underscore', 'models/model', 'locale', 'models/http'], function (_, Model, LOCALE, Http) {
 	if (!GLOBAL._application) {
-		var Application = Backbone.Model.extend({
+		var Application = Model.extend({
 			attributes: {
 				root: null,
 				language: null,

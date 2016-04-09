@@ -19,6 +19,9 @@
 		<div id="container" class="row">
 			<div class="content col-xs-10 col-sm-8 col-xs-offset-1 col-sm-offset-2">
 				<h1><%=template.title()%></h1>
+				<%_.each(_.keys(template.flash()), function(type) {%>
+					<div class="alert alert-<%=type%>"><%=template.flash(type).join(', ')%></div>
+				<%})%>
 				<%=template.content()%>
 			</div>
 		</div>

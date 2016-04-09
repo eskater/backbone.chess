@@ -18,18 +18,20 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 			session: null,
 			cookieid: null,
         },
-        defaults: {
-			get: {},
-			post: {},
-            port: 80,
-			root: 'client/',
-            index: 'index.html',
-			params: {},
-			status: 200,
-			content: '',
-			headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
-            address: '127.0.0.1',
-			cookieid: '_cookie_id',
+        defaults: function() {
+			return {
+				get: {},
+				post: {},
+	            port: 80,
+				root: 'client/',
+	            index: 'index.html',
+				params: {},
+				status: 200,
+				content: '',
+				headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
+	            address: '127.0.0.1',
+				cookieid: '_cookie_id',
+			}
         },
         initialize: function() {
             this.router(new Router(this));
@@ -78,7 +80,7 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 			return this;
         },
 		reset: function() {
-			this.set(_.omit(this.defaults, 'root', 'index', 'address', 'cookieid'));
+			this.set(_.omit(this.defaults(), 'root', 'index', 'address', 'cookieid'));
 
 			return this;
 		},

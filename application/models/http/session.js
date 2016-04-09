@@ -1,4 +1,4 @@
-define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], function (_, Model, Sessions, fs) {
+define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs', 'models/utils'], function (_, Model, Sessions, fs, utils) {
 	return Model.extend({
 		idAttribute: 'sessid',
         attributes: {
@@ -21,7 +21,7 @@ define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], f
 				return this.setattr.apply(this, arguments);
 			}
 
-			var data = this._compact({name: name, value: value, expires: expires, path: path, domain: domain, secure: secure, rebuilt: rebuilt}),
+			var data = utils.compact({name: name, value: value, expires: expires, path: path, domain: domain, secure: secure, rebuilt: rebuilt}),
 				session = this.sessions().findWhere(_.omit(data, 'rebuilt'));
 
 			if (!session) {
@@ -102,17 +102,6 @@ define(['underscore', 'models/model', 'collections/http/item/sessions', 'fs'], f
 		},
 		sync: function() {
 			return false;
-		},
-		_compact: function(object) {
-			var data = {};
-
-			for (var i in object) {
-				if (typeof object[i] != 'undefined') {
-					data[i] = object[i];
-				}
-			}
-
-			return data;
 		}
     });
 });

@@ -37,12 +37,15 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
     }).push({
         url: '^/auth/singin/$',
         post: function(http) {
-            http.forward('auth', 'get');
+            template.flash('danger', 'User not found');
+            template.flash('danger', 'Yes! User not found');
+
+            http.forward('auth');
         }
     }).push({
         url: '^/auth/singup/$',
         post: function(http) {
-            http.forward('auth', 'get');
+            http.forward('auth');
         }
     }).push({
         url: '^/redirect/$',
