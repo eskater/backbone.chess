@@ -1,12 +1,15 @@
 define(['models/model'], function (Model) {
 	return Model.extend({
-		attributes: {
-            id: null,
-            login: null,
-            email: null
+		name: 'User',
+		fields: {
+            login: String,
+            email: String,
+			password: String
         },
-        defaults: {
-
+		attributes: {
+            login: null,
+            email: null,
+			password: null
         },
         initialize: function() {
 

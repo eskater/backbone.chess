@@ -3,11 +3,11 @@ var mongoose = require('mongoose'),
 
 mongoose.connect('mongodb://localhost/chess');
 
-var Party = 
+var Party =
 		schema({
 			board: String
 		}),
-	History = 
+	History =
 		schema({
 			party: {type: schema.Types.ObjectId, ref: 'Party'},
 			type: String,
@@ -16,13 +16,13 @@ var Party =
 			color: String,
 			figure: String,
 			replace: {
-				color: String, 
+				color: String,
 				figure: String
 			},
 			current: [Number],
 			previous: [Number]
 		});
-		
+
 mongoose.model('Party', Party);
 mongoose.model('History', History);
 

@@ -23,7 +23,7 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 				get: {},
 				post: {},
 	            port: 80,
-				root: 'client/',
+				root: './client/',
 	            index: 'index.html',
 				params: {},
 				status: 200,
@@ -34,7 +34,7 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 					'Date': new Date().toUTCString(),
 				},
 	            address: '127.0.0.1',
-				cookieid: '_cookie_id',
+				cookieid: '_chess_id',
 			}
         },
         initialize: function() {
