@@ -34,6 +34,9 @@ define(['underscore', 'models/model', 'locale', 'models/http'], function (_, Mod
 
 				return this.http().route();
 			},
+			urlpath: function(path) {
+				return path;
+			},
 			gettext: function(text) {
 				var language = this.get('language');
 

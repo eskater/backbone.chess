@@ -28,7 +28,11 @@ define(['underscore', 'models/model', 'http', 'fs', 'models/http/router', 'model
 				params: {},
 				status: 200,
 				content: '',
-				headers: {'Server': 'Node.js', 'Content-Type': 'text/html'},
+				headers: {
+					'Server': 'Node.js',
+					'Content-Type': 'text/html',
+					'Date': new Date().toUTCString(),
+				},
 	            address: '127.0.0.1',
 				cookieid: '_cookie_id',
 			}

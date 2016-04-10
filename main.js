@@ -37,7 +37,7 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
             }
         }
     }).push({
-        url: '^/\\w+/auth/$',
+        url: '^/\\w+/auth/?$',
         name: 'auth',
         get: function(http) {
             return template.scheme('auth').title(application.gettext('template-auth-title')).render();

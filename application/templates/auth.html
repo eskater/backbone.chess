@@ -3,7 +3,7 @@
         <div class="col-sm-12">
             <h3><%=application.gettext('template-auth-singin-title')%></h3>
         </div>
-        <form name="singin-form" action="/auth/singin/" method="POST" class="form-horizontal">
+        <form name="singin-form" action="<%=application.urlpath('/auth/singin/')%>" method="POST" class="form-horizontal">
             <div class="form-group">
                 <label for="email" class="col-xs-12 col-sm-4">Email:</label>
                 <div class="col-xs-12 col-sm-8">
