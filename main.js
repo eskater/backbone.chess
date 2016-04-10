@@ -27,7 +27,7 @@ requirejs.config({
 	}
 });
 
-requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template'], function (jQuery, _, Backbone, application, template) {
+requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template', 'collections/users'], function (jQuery, _, Backbone, application, Users) {
     application.http().router().push({
         url: '^/(language:\\w+)/?',
         solid: true,

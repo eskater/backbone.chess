@@ -1,6 +1,6 @@
 define(['models/model'], function (Model) {
 	return Model.extend({
-		name: 'User',
+		table: 'users',
 		fields: {
             login: String,
             email: String,
@@ -11,6 +11,7 @@ define(['models/model'], function (Model) {
             email: null,
 			password: null
         },
+		idAttribute: '_id'
         initialize: function() {
 
         }

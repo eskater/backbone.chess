@@ -1,5 +1,5 @@
-define(['backbone', 'models/history'], function (Backbone, History) {
-	return Backbone.Collection.extend({
+define(['collections/collection', 'models/history'], function (Collection, History) {
+	return Collection.extend({
 		model: History,
         initialize: function() {
             this.on('eat move queen castling', this.push, this);

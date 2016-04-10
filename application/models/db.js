@@ -18,13 +18,22 @@ define(['backbone'], function (Backbone) {
 
             return this.get('db');
         },
-        add: function(data) {
-
-        },
         start: function() {
 
         },
         table: function(name) {
+
+        },
+        where: function() {
+
+        },
+        create: function() {
+
+        },
+        update: function() {
+
+        },
+        delete: function() {
 
         },
         address: function(address) {
@@ -35,6 +44,9 @@ define(['backbone'], function (Backbone) {
             }
 
             return this.get('address');
-        }
+        },
+        addtable: function(name, data) {
+
+        },
     });
 });

@@ -1,5 +1,5 @@
-define(['underscore', 'backbone', 'models/http/item/cookie'], function (_, Backbone, Cookie) {
-	return Backbone.Collection.extend({
+define(['underscore', 'collections/collection', 'models/http/item/cookie'], function (_, Collection, Cookie) {
+	return Collection.extend({
 		model: Cookie,
         parse: function(tokens, rebuilt) {
             _.map(tokens.split(';'), (function(tokens) { this.create().parse(tokens, rebuilt); }).bind(this));

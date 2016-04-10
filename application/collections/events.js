@@ -1,5 +1,5 @@
-define(['backbone', 'models/event'], function (Backbone, Event) {
-	return Backbone.Collection.extend({
+define(['collections/collection', 'models/event'], function (Collection, Event) {
+	return Collection.extend({
 		model: Event,
         check: function() {
             _.each(this.models, (function(event) {

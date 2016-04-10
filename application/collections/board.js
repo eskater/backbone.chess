@@ -1,5 +1,5 @@
-define(['backbone', 'models/figure', 'collections/history'], function (Backbone, Figure, History) {
-	return Backbone.Collection.extend({
+define(['collections/collection', 'models/figure', 'collections/history'], function (Collection, Figure, History) {
+	return Collection.extend({
 		model: Figure,
         initialize: function() {
             this.collectionHistory = new History();

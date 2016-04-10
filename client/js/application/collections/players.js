@@ -1,5 +1,5 @@
-define(['backbone', 'models/player'], function (Backbone, Player) {
-	return Backbone.Collection.extend({
+define(['collections/collection', 'models/player'], function (Collection, Player) {
+	return Collection.extend({
 		model: Player,
         initialize: function() {
             this.add([{walk: true, color: 'white'}, {walk: false, color: 'black'}]);

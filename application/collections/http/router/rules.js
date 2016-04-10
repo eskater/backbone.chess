@@ -1,5 +1,5 @@
-define(['backbone', 'models/http/router/rule'], function (Backbone, Rule) {
-	return Backbone.Collection.extend({
+define(['collections/collection', 'models/http/router/rule'], function (Collection, Rule) {
+	return Collection.extend({
 		model: Rule
     });
 });
