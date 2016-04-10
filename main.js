@@ -45,8 +45,7 @@ requirejs(['jquery', 'underscore', 'backbone', 'application', 'models/template']
     }).push({
         url: '^/\\w+/auth/singin/?$',
         post: function(http) {
-            template.flash('danger', 'User not found');
-            template.flash('danger', 'Yes! User not found');
+            template.flash('danger', 'User not found').flash('warning', 'Yes! User not found');
 
             http.forward('auth');
         }
